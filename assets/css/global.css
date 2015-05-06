@@ -3,5 +3,38 @@ body {
     background-color: #fff;
 }
 
+.huge { font-size: 3em; }
+
+.quick-search-wrapper {
+    padding: 15px;
+    background: #f4f4f4;
+    border: 1px solid #e7e7e7;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.quick-search-wrapper .title {
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.form-import-wrapper {
+    padding: 15px;
+    background: #f4f4f4;
+    border: 1px solid #e7e7e7;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+/* Small devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+    .huge { font-size: 5em; }
+}
+
+/* Medium devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .huge { font-size: 5em; }
+}
+
 
 

@@ -59,7 +59,7 @@ class My_Controller extends CI_Controller
     public function isZone($name = '')
     {
         if(!($this->session->userdata('id_user') > 0 && $this->session->userdata('zone') === $name) )
-            redirect('login');
+            redirect('signin');
     }
     
     /*

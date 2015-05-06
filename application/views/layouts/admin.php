@@ -54,11 +54,11 @@
             
         <?php if (_cr('boxes') || 1==1 ): ?>
         <!-- Children menu -->
-          <li class="dropdown"><a class="dropdown-toggle"  data-toggle="dropdown" href="#">Enfants <b class="caret"></b></a>
+          <li class="dropdown"><a class="dropdown-toggle"  data-toggle="dropdown" href="#">Packs <b class="caret"></b></a>
                 <ul class="dropdown-menu" >
-                    <li><a href="<?php echo sbase_url() ?>admin/children">Liste des enfants</a></li>
-                    <li class="divider"></li>
-                    <li><a href="<?php echo sbase_url() ?>admin/parents">Liste des parents</a></li>
+                    <li><a href="<?php echo sbase_url() ?>admin/box">View all</a></li>
+                    <li><a href="<?php echo sbase_url() ?>admin/box/showallout">View all out</a></li>
+                    <li><a href="<?php echo sbase_url() ?>admin/box/showallin">View all in</a></li>
                 </ul>
           </li>
         <?php endif; ?>
@@ -91,12 +91,12 @@
 
         <!-- right menu -->
         <ul class="nav navbar-nav navbar-right">
-          <li class="dropdown"><a class="dropdown-toggle"  data-toggle="dropdown" href="#"><?php echo displayUserName($this->session->userdata('firstname'),$this->session->userdata('lastname')) ?> <b class="caret"></b></a>
+          <li class="dropdown"><a class="dropdown-toggle"  data-toggle="dropdown" href="#"><?php echo $this->session->userdata('firstname').' '.$this->session->userdata('lastname') ?> <b class="caret"></b></a>
             <ul class="dropdown-menu" >
               <!-- <li><a href="#">Congés</a></li> -->
               <li><a href="<?php echo sbase_url() ?>admin/employees/editpassword">Changer password</a></li>
               <li class="divider"></li>
-              <li><a href="<?php echo sbase_url() ?>login/logout">Déconnecter</a></li>
+              <li><a href="<?php echo sbase_url() ?>signin/logout">Déconnecter</a></li>
             </ul>
           </li>
         </ul>

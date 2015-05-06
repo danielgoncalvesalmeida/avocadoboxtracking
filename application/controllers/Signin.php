@@ -23,7 +23,7 @@ class Signin extends My_Controller {
 		if ( $this->form_validation->run() )
 		{
 
-			$this->load->model('login_model');
+			$this->load->model('Login_Model');
 			if ( !$this->login_model->authenticate($this->input->post('edusr'),$this->input->post('edpwd'), $redirect = 'admin/dashboard') )
             {
                 $dview['authfailed'] = 'Username or password are not correct!';
@@ -36,6 +36,12 @@ class Signin extends My_Controller {
 
         $this->display('admin/login', $dview, $loadOnlyView = true);
         //$this->load->view('admin/login');
+    }
+    
+    public function logout()
+    {
+        session_destroy();
+        redirect('signin');
     }
 }
 

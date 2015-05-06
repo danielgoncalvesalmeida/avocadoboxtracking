@@ -34,7 +34,7 @@
         <?php echo form_error('edpwd'); ?>
         <?php echo (isset($authfailed) ? $authfailed : ''); ?>
     <?php endif; ?>
-    <h2 class="form-signin-heading">Please sign in</h2>
+    <h2 class="form-signin-heading"><img src="<?php echo sbase_url() ?>assets/img/favicon.ico.png">&nbsp;Avocado</h2>
     <label for="inputEmail" class="sr-only">Email address</label>
     <input name="edusr" type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
     <label for="inputPassword" class="sr-only">Password</label>

@@ -19,7 +19,6 @@ class Login_Model extends CI_Model {
                 AND `active` = 1
                 LIMIT 1";
         $result = $this->db->query($sql, array($usr, sha1($this->config->item('salt').$pwd)));
-
 		if ( $result->num_rows() > 0 )
         {
 			$user = $result->row();

@@ -51,7 +51,7 @@
 </div>
 
 <?php
-    if(isset($conflict) && count($conflict) > 0):
+    if(isset($failed) && count($failed) > 0):
 ?>
 <div class="row">
     <div class="col-md-12">
@@ -60,9 +60,17 @@
                 No outbound found
             </div>
             <div class="panel-body">
-            <?php foreach ($conflict as $item ): ?>
+            <?php foreach ($failed as $item ): ?>
                 <div class="row">
-                    <div class="col-md-12"><strong><?php echo $item ?></strong></div>
+                    <div class="col-md-12">
+                        <strong><?php echo $item['tag'] ?></strong> 
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <?php echo $item['message'] ?> 
+                        <br /><br />
+                    </div>
                 </div>
             <?php endforeach; ?>
             </div>
@@ -85,9 +93,18 @@
             </div>
             <div class="panel-body">
 
-            <?php foreach ($success as $item): ?>
+            <?php 
+                foreach ($success as $shipping => $item): ?>
                 <div class="row">
-                    <div class="col-md-12">Pack <strong><?php echo $item['pack'] ?></strong> inbound from shipping <strong><?php echo $item['shipping'] ?></strong></div>
+                    <div class="col-md-12">
+                        <strong><?php echo $item['tag'] ?></strong>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <?php echo $item['message'] ?> 
+                        <br /><br />
+                    </div>
                 </div>
             <?php endforeach; ?>
             </div>

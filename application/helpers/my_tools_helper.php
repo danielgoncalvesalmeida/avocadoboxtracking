@@ -224,8 +224,19 @@ function getUserDomain()
 */
 function getUserId()
 {
+    if(isset($_SESSION['id_user']))
+        return $_SESSION['id_user'];
+    else
+        return false;
+        
+        
+   /*
+    * discontinued
+    * 
    $CI =& get_instance();
    return $CI->session->userdata('id_user');
+    * 
+    */
 }
 
 /*

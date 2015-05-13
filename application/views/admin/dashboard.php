@@ -55,10 +55,10 @@
                     <div class="col-xs-3">
                         <span class="glyphicon glyphicon-check"></span>
                     </div>
-                    <div class="col-xs-9 text-right">
-                        <div class="">Import outbound</div>
+                    <div class="col-xs-9">
+                        <div class="">Import shipping</div>
                         <div>
-                            <a href="<?php echo sbase_url() ?>admin/importreferences/addoutbound" class="btn btn-primary">Submit outbound</a>
+                            <a href="<?php echo sbase_url() ?>admin/importreferences/addshipping" class="btn btn-primary">Import shipping</a>
                         </div>
                     </div>
                 </div>
@@ -68,13 +68,31 @@
     </div>
     
     <div class="col-sm-12 col-md-3">
+        
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="row">
                     <div class="col-xs-3">
                         <span class="glyphicon glyphicon-check"></span>
                     </div>
-                    <div class="col-xs-9 text-right">
+                    <div class="col-xs-9">
+                        <div class="">Import outbound</div>
+                        <div>
+                            <a href="<?php echo sbase_url() ?>admin/importreferences/addoutbound" class="btn btn-primary">Submit outbound</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <span class="glyphicon glyphicon-check"></span>
+                    </div>
+                    <div class="col-xs-9">
                         <div class="">Import inbound</div>
                         <div>
                             <a href="<?php echo sbase_url() ?>admin/importreferences/addinbound" class="btn btn-primary">Submit inbound</a>

@@ -25,8 +25,36 @@ class Boxes_Model extends CI_Model {
     /*
      * Get the all the boxes with a current count_outbound
      */
-    public function getAll($p = null, $n = null, $orderby = null)
+    public function getAll($p = null, $n = null, $orderby = null, $filter = null)
     {
+        $p = (is_numeric($p) ? $p - 1 : null);
+        
+        // Build the where clause
+        if(is_array($filter) && count($filter) > 0)
+        {
+            $where_str = 'WHERE 1 ';
+        
+            foreach ($filter as $fname => $fvalue)
+            {
+                if(is_array($fvalue))
+                {
+                    if(isset($fvalue['value']))
+                    {
+                        $where_str .= ' AND '.$fname;
+                        // Consider as string
+                        if(isset($fvalue['wildcard']))
+                            $where_str .= ' LIKE '.$this->db->escape(str_replace('{}', $fvalue['value'], $fvalue['wildcard'])).' ';
+                        // Consider as numeric (integer or currency)
+                        if(isset($fvalue['isnumeric']))
+                            $where_str .= ' = '.(int)$fvalue['value'].' ';
+                    }
+                    
+                }
+                else
+                    $where_str .= ' AND '.$fname.' = '.$this->db->escape($fvalue);
+            }
+        }
+        
         $sql = "SELECT *,
                 (SELECT COUNT(`id_shipping_pack`) FROM ao_shipping_pack WHERE `inbound` = 0 AND `id_pack` = p.`id_pack`) as count_outbound,
                 (SELECT @id_shipping_pack := MAX(`id_shipping_pack`) FROM ao_shipping_pack WHERE `id_pack` = p.`id_pack`) as `id_shipping_pack`,
@@ -36,9 +64,11 @@ class Boxes_Model extends CI_Model {
                 (SELECT `date_inbound` FROM ".$this->db->dbprefix('shipping_pack')." WHERE `id_shipping_pack` = @id_shipping_pack) as `date_inbound`,
                 (SELECT s.`reference` FROM ".$this->db->dbprefix('shipping')." s, ".$this->db->dbprefix('shipping_pack')." sp WHERE sp.`id_shipping_pack` = @id_shipping_pack AND sp.`id_shipping` = s.`id_shipping`) as `reference`
             FROM ".$this->db->dbprefix('pack')." p "
-            .(empty($orderby) ? 'ORDER BY p.`barcode` ' : 'ORDER BY '.$orderby)
+            .(isset($where_str) ? $where_str : '')
+            .(empty($orderby) ? ' ORDER BY p.`barcode` ' : ' ORDER BY '.$orderby)
             .((is_numeric($p) && is_numeric($n)) ? ' LIMIT '.$p * $n.','.$n : '');
         $result = $this->db->query($sql);
+
         if ( $result !== null )
         {
             $rows = $result->result();
@@ -63,6 +93,12 @@ class Boxes_Model extends CI_Model {
         }
         else
             return false;
+    }
+    
+    public function getAllCount($filter = null)
+    {
+        $result = $this->getAll(null, null, null, $filter);
+        return count($result);
     }
     
     /*

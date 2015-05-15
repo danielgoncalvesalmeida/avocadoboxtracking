@@ -11,8 +11,25 @@ $config['appname'] = 'Boxtracking';
 
 $config['use_https'] = FALSE;
 
-// Assets version -> force cache refresh from browser
-$config['assets_version'] = '20150319001';
+// Default results per page
+$config['results_per_page_default'] = 2;
+
+/*
+ 	========================================
+
+ 	LOCALES
+ 	
+ 	========================================
+*/
+
+// Date format 
+$config['format_date_human'] = 'j/m/Y';
+// Date/Time format 
+$config['format_datetime_human'] = 'j/m/Y G:h';
+// Date/Time format 
+$config['format_datetimeseconds_human'] = 'j/m/Y G:h:s';
+
+
 
 /*
  	========================================
@@ -21,6 +38,10 @@ $config['assets_version'] = '20150319001';
  	
  	========================================
 */
+
+
+// Assets version -> force cache refresh from browser
+$config['assets_version'] = '20150319001';
 
 // Do not add as first character a '/' it is provided by the base_url and media servers
 $config['assets_path'] = 'assets/';

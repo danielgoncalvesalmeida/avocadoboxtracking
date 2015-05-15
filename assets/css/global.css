@@ -26,6 +26,15 @@ body {
     margin-bottom: 15px;
 }
 
+.filter-wrapper {
+    margin: 15px;
+    background: #f4f4f4;
+    border: 1px solid #e7e7e7;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    padding-top: 15px;
+}
+
 /* Small devices (tablets, 768px and up) */
 @media (min-width: 768px) {
     .huge { font-size: 5em; }

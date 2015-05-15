@@ -1,18 +1,18 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Box extends My_Controller {
+class Shipping extends My_Controller {
     
     public function __construct()
     {
         $this->layout = 'admin';
         parent::__construct();
         $this->isZone('app');
-        $this->load->model('boxes_model');
+        $this->load->model('shipping_model');
     }
     
 	public function index()
 	{
-        $this->setTitle('Pack | '.$this->config->item('appname'));
+        $this->setTitle('Shipping | '.$this->config->item('appname'));
         $dview = array();
 
         // Handle pagination if provided
@@ -28,19 +28,20 @@ class Box extends My_Controller {
         {
             $this->load->library('form_validation');
             $filter_params = array(
-                'barcode' => (isset($_GET['filter']['edbarcode']) ? $_GET['filter']['edbarcode'] : null),
-                'status' => (isset($_GET['filter']['edstatus']) ? $_GET['filter']['edstatus'] : null),
+                'reference' => (isset($_GET['filter']['edreference']) ? $_GET['filter']['edreference'] : null),
+                'username' => (isset($_GET['filter']['edusername']) ? $_GET['filter']['edusername'] : null),
             );
             $this->form_validation->set_data($filter_params);
-            $this->form_validation->set_rules('barcode','barcode','alpha_numeric');
-            $this->form_validation->set_rules('status','status','numeric');
+            $this->form_validation->set_rules('reference','reference','alpha_numeric');
+            
             if ($this->form_validation->run())
             {
                 $filter = array();
-                $filter['barcode'] = array('value' => $filter_params['barcode'], 'wildcard' => '{}%');
+                $filter['reference'] = array('value' => $filter_params['reference'], 'wildcard' => '{}%');
+                $filter['username'] = array('value' => $filter_params['username'], 'wildcard' => '{}%');
 
-                $dview['items'] = $this->boxes_model->getAll($this->p, $this->n, null, $filter);
-                $dview['items_count'] = $this->boxes_model->getAllCount($filter);
+                $dview['items'] = $this->shipping_model->getAll($this->p, $this->n, null, $filter);
+                $dview['items_count'] = $this->shipping_model->getAllCount($filter);
                 $dview['items_filtered'] = true;
                 $dview['filter'] = $_GET['filter'];
                 $filter_url_params = '';
@@ -55,11 +56,11 @@ class Box extends My_Controller {
         // Set the recordset for unfiltred
         if(!isset($dview['items']))
         {
-            $dview['items'] = $this->boxes_model->getAll($this->p, $this->n);
-            $dview['items_count'] = $this->boxes_model->getAllCount();
+            $dview['items'] = $this->shipping_model->getAll($this->p, $this->n);
+            $dview['items_count'] = $this->shipping_model->getAllCount();
         }
       
-        $this->display('box_list', $dview);
+        $this->display('shipping_list', $dview);
     }
     
     public function showAllOut()

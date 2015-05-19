@@ -28,6 +28,7 @@
             <table class="table table-striped">
                 <thead>
                     <th>Shipping</th>
+                    <th>Customer</th>
                     <th>Outbound</th>
                     <th>Inbound</th>
                     <th></th>
@@ -37,22 +38,28 @@
                     <?php  
                         foreach ($history as $item):
                             
-                            if($item->outbound == 1 && $item->inbound == 1)
+                            $date_out = new DateTime( substr($item->date_outbound,0,10) );
+                            if($item->inbound == 1)
                             {
-                                $date_outbound = new DateTime( substr($item->date_outbound,0,10) );
-                                $date_inbound = new DateTime( substr($item->date_inbound,0,10) );
-                                $age = date_diff($date_inbound, $date_outbound);
+                                $date_in = new DateTime( substr($item->date_inbound,0,10) );
+                                $age = date_diff($date_in, $date_out);
                             }
                             else
-                                $age = false;
+                            {
+                                $date_in = new DateTime( date('Y-m-d') );
+                                $age = date_diff($date_in, $date_out);
+                            }
                     ?>
                         <tr>
                             <td><?php echo $item->reference ?></td>
-                            <td><?php if($item->outbound == 1): ?><span class="label label-danger"><?php echo $item->date_outbound ?></span><?php endif; ?></td>
-                            <td><?php if($item->inbound == 1): ?><span class="label label-success"><?php echo $item->date_inbound ?></span><?php endif; ?></td>
+                            <td><?php echo $item->customer ?></td>
+                            <td><?php if($item->outbound == 1): ?><span class="label label-danger"><span class="glyphicon glyphicon-share"></span>&nbsp<?php echo date_format($date_out, $this->config->item('format_date_human')) ?>
+                                <?php echo (!empty($item->out_firstname) ? ' - '.$item->out_firstname : '') ?></span><?php endif; ?></td>
+                            <td><?php if($item->inbound == 1): ?><span class="label label-success"><span class="glyphicon glyphicon-share"></span>&nbsp<?php echo date_format($date_in, $this->config->item('format_date_human')) ?>
+                                <?php echo (!empty($item->in_firstname) ? ' - '.$item->in_firstname : '') ?></span><?php endif; ?></td>
                             <td>
                                 <?php if($age && $age->d > 0): ?>
-                                    <span class="label label-danger">
+                                    <span class="label <?php echo ($item->inbound == 0 ? 'label-danger' : 'label-default') ?>">
                                     <?php if($age->d == 1)
                                         echo '1 day out';
                                     elseif($age->d > 1)

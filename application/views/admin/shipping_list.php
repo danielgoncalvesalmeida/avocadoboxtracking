@@ -31,6 +31,7 @@
             <input type="text" class="form-control" id="edreference" name="filter[edreference]" placeholder="Enter the reference" value="<?php echo (isset($filter['edreference']) ? $filter['edreference'] : '') ?>">
         </div>
     </div>
+    <!--
     <div class="col-md-2">
         <div class="form-group">
             <label for="eddatedeliverystart">Date delivery</label>
@@ -43,6 +44,7 @@
             <input type="text" class="form-control" id="eddatedeliveryend" name="filter[eddatedeliveryend]" placeholder="Enter a date" value="<?php echo (isset($filter['eddatedeliveryend']) ? $filter['eddatedeliveryend'] : '') ?>">
         </div>
     </div>
+    -->
     <div class="col-md-2">
         <div class="form-group">
             <label for="edusername">Customer</label>
@@ -79,7 +81,7 @@
             <th>Date delivery</th>
             <th>Customer</th>
             <th>Boxes</th>
-            <th></th>
+            <!-- <th></th> -->
         </thead>
         <tbody>
             <?php  
@@ -108,19 +110,22 @@
                                         $age = date_diff($date_in, $date_out);
                                     }
                                 ?>
+                            <div class="shipping-detaisl-row-wrapper">
                             <strong><?php echo $pack->barcode ?></strong>
-                            &nbsp;<span class="label label-danger" ><span class="glyphicon glyphicon-share"></span>&nbsp;<?php echo date_format($date_out, $this->config->item('format_date_human')) ?></span>
+                            &nbsp;<span class="label label-danger" ><span class="glyphicon glyphicon-share"></span>&nbsp;<?php echo date_format($date_out, $this->config->item('format_date_human')) ?>
+                            <?php echo (!empty($pack->out_firstname) ? ' - '.$pack->out_firstname : '') ?></span>
                             <?php if(isset($date_in)): ?>
                                 &nbsp;<span class="label label-default"><span class="glyphicon glyphicon-resize-horizontal"></span>&nbsp;<?php echo ($age->days < 2 ? $age->days.' day' : $age->days.' days') ?></span>
-                                &nbsp;<span class="label label-success" ><span class="glyphicon glyphicon-share"></span>&nbsp;<?php echo date_format($date_in, $this->config->item('format_date_human')) ?></span>
+                                &nbsp;<span class="label label-success" ><span class="glyphicon glyphicon-check"></span>&nbsp;<?php echo date_format($date_in, $this->config->item('format_date_human')) ?>
+                                <?php echo (!empty($pack->in_firstname) ? ' - '.$pack->in_firstname : '') ?></span>
                             <?php endif; ?>
-                            <br />
+                            </div>
                             <?php
                                 endforeach;
                                 endif; ?>
                         </div>
                     </td>
-                    <td><a class="btn btn-primary btn-sm pull-right" href="<?php echo sbase_url() ?>admin/box/viewhistory/<?php echo $item->id_shipping ?>?<?php echo (isset($link_back) ? 'link_back='.$link_back : '') ?>">View history</a></td>
+                    <!-- <td><a class="btn btn-primary btn-sm pull-right" href="<?php echo sbase_url() ?>admin/box/viewhistory/<?php echo $item->id_shipping ?>?<?php echo (isset($link_back) ? 'link_back='.$link_back : '') ?>">View history</a></td> -->
                 </tr>
             <?php
                 endforeach;

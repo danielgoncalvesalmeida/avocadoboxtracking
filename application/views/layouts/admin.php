@@ -53,30 +53,32 @@
         <ul class="nav navbar-nav">
             
         <?php if (_cr('boxes') || 1==1 ): ?>
-        <!-- Children menu -->
+        <!-- Boxes menu -->
           <li class="dropdown"><a class="dropdown-toggle"  data-toggle="dropdown" href="#">Packs <b class="caret"></b></a>
                 <ul class="dropdown-menu" >
                     <li><a href="<?php echo sbase_url() ?>admin/box">View all</a></li>
-                    <li><a href="<?php echo sbase_url() ?>admin/box/showallout">View all out</a></li>
-                    <li><a href="<?php echo sbase_url() ?>admin/box/showallin">View all in</a></li>
                 </ul>
           </li>
         <?php endif; ?>
           
-        <?php if (_cr('employees')): ?>
+        <!-- Shipping menu -->
+          <li class="dropdown"><a class="dropdown-toggle"  data-toggle="dropdown" href="#">Shippings <b class="caret"></b></a>
+                <ul class="dropdown-menu" >
+                    <li><a href="<?php echo sbase_url() ?>admin/shipping">View all</a></li>
+                </ul>
+          </li>
+      
+          
+        <?php if (_cr('employees') && 1==0): ?>
         <!-- Employees menu -->
           <li class="dropdown"><a class="dropdown-toggle"  data-toggle="dropdown" href="#">Employés <b class="caret"></b></a>
             <ul class="dropdown-menu" >
               <li><a href="<?php echo sbase_url() ?>admin/employees">Utilisateurs</a></li>
-              <!--
-              <li class="divider"></li>
-              <li><a href="#">Congés</a></li>
-            -->
             </ul>
           </li>
         <?php endif; ?>
           
-        <?php if (_cr('admin')): ?>
+        <?php if (_cr('admin') && 1==0): ?>
         <!-- Admin -->
         <li class="dropdown"><a class="dropdown-toggle"  data-toggle="dropdown" href="#">Admin <b class="caret"></b></a>
           <ul class="dropdown-menu" >
@@ -125,7 +127,7 @@
 </div>
 
 <?php
-    if (1 == 1 && ENVIRONMENT === 'development'):
+    if (1 == 0 && ENVIRONMENT === 'development'):
 ?>
     <!-- Benchmark -->
     <div class="alert alert-warning">

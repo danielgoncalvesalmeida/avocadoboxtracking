@@ -38,9 +38,14 @@ class Box extends My_Controller {
             {
                 $filter = array();
                 $filter['barcode'] = array('value' => $filter_params['barcode'], 'wildcard' => '{}%');
-
-                $dview['items'] = $this->boxes_model->getAll($this->p, $this->n, null, $filter);
-                $dview['items_count'] = $this->boxes_model->getAllCount($filter);
+                $status = null;
+                if($filter_params['status'] == 1)
+                    $status = 1;
+                if($filter_params['status'] == 2)
+                    $status = 2;
+                    
+                $dview['items'] = $this->boxes_model->getAll($this->p, $this->n, null, $filter, $status);
+                $dview['items_count'] = $this->boxes_model->getAllCount($filter, $status);
                 $dview['items_filtered'] = true;
                 $dview['filter'] = $_GET['filter'];
                 $filter_url_params = '';
@@ -62,32 +67,6 @@ class Box extends My_Controller {
         $this->display('box_list', $dview);
     }
     
-    public function showAllOut()
-	{
-        $this->setTitle('Pack in outbound status | '.$this->config->item('appname'));
-        $dview = array();
-        
-        $this->load->model('boxes_model');
-        $dview['items'] = $this->boxes_model->getAllOut();
-        
-        $dview['link_back'] = 1;
-      
-        $this->display('box_list', $dview);
-    }
-    
-    public function showAllIn()
-	{
-        $this->setTitle('Pack in inbound status | '.$this->config->item('appname'));
-        $dview = array();
-        
-        $this->load->model('boxes_model');
-        $dview['items'] = $this->boxes_model->getAllIn();
-        
-        $dview['link_back'] = 2;
-      
-        $this->display('box_list', $dview);
-    }
-    
     public function viewHistory($id)
     {
         $this->setTitle('Pack history | '.$this->config->item('appname'));
@@ -100,7 +79,7 @@ class Box extends My_Controller {
         
         $dview['pack'] = $this->boxes_model->getitem((int)$id);
         $dview['history'] = $this->boxes_model->getHistory((int)$id);
-       
+
         $this->display('box_history', $dview);
     }
 }

@@ -18,6 +18,12 @@ body {
     font-weight: bold;
 }
 
+.quick-search-body-subtitle {
+    margin-bottom: 10px;
+    font-weight: bold;
+    border-bottom: #f4f4f4 solid 1px;
+}
+
 .form-import-wrapper {
     padding: 15px;
     background: #f4f4f4;
@@ -33,6 +39,14 @@ body {
     border-radius: 5px;
     margin-bottom: 15px;
     padding-top: 15px;
+}
+
+.shipping-details-wrapper {
+    padding-top: 5px;
+}
+
+.shipping-detaisl-row-wrapper {
+    margin-top: 5px;
 }
 
 /* Small devices (tablets, 768px and up) */

@@ -67,14 +67,18 @@ class Shipping_Model extends CI_Model {
         if ( $result !== null )
         {
             $rows = $result->result();
-            
-            // set the status to in = 0 or to out = 1
+            // Retrieve the packs used for each shipping
             foreach ($rows as $k => &$v)
             {
-                
-                $sql = "SELECT *
+                $sql = "SELECT *,
+                        u_out.`firstname` as out_firstname,
+                        u_out.`lastname` as out_lastname,
+                        u_in.`firstname` as in_firstname,
+                        u_in.`lastname` as in_lastname
                     FROM ".$this->db->dbprefix('shipping_pack')." sp
                     LEFT JOIN ".$this->db->dbprefix('pack')." p ON (sp.`id_pack` = p.`id_pack`)
+                    LEFT JOIN ".$this->db->dbprefix('user')." u_out ON (sp.`id_user_outbound` = u_out.`id_user`)
+                    LEFT JOIN ".$this->db->dbprefix('user')." u_in ON (sp.`id_user_inbound` = u_in.`id_user`)
                     WHERE sp.`id_shipping` = ?
                     GROUP BY sp.`id_pack`
                     ORDER BY p.`barcode`";
@@ -97,6 +101,43 @@ class Shipping_Model extends CI_Model {
         return count($result);
     }
     
+    public function getQuickSearchByReference($ref)
+    {
+        $sql = "SELECT *
+            FROM ".$this->db->dbprefix('shipping')." s
+            WHERE s.`reference` = ?";
+        $shipping = $this->db->query($sql, array($ref))->row();
+        
+        if($shipping === null)
+            return false;
+        
+        if(isset($shipping->id_shipping))
+            $id_shipping = (int)$shipping->id_shipping;
+        else
+            return false;
+        
+        // id_shipping is present -> continue
+        // Retrieve the packs related to the shipping
+        $sql = "SELECT *
+            FROM ".$this->db->dbprefix('shipping_pack')." sp
+            LEFT JOIN ".$this->db->dbprefix('pack')." p ON (sp.`id_pack` = p.`id_pack`)
+            WHERE sp.`id_shipping` = ?
+            ORDER BY p.`barcode`";
+        $packs = $this->db->query($sql, array($id_shipping))->result();
+        if($packs === null)
+            $packs = false;
+        
+        $result = array(
+            'id_shipping' => $id_shipping,
+            'reference' => $shipping->reference,
+            'username' => $shipping->username,
+            'date_delivery' => $shipping->date_delivery,
+            'packs' => $packs,
+        );
+        
+        return $result;
+    }
+    
     /*
      *  Check if the barcode exists
      */
@@ -114,6 +155,64 @@ class Shipping_Model extends CI_Model {
 			return $result->row();
         else
             return false;
+    }
+    
+    /*
+     *  Get the user if it is related to a shipping
+     */
+    public function getByUser($username)
+    {
+        $sql = "SELECT *
+            FROM ".$this->db->dbprefix('shipping')." s
+            WHERE s.`username` = ?";
+        $user = $this->db->query($sql, array($username))->row();
+        
+        if($user === null)
+            return false;
+        
+        // User identified -> get shippings
+        $sql = "SELECT *
+            FROM ".$this->db->dbprefix('shipping')." s
+            WHERE s.`username` = ?
+            ORDER BY s.`date_delivery` DESC
+            LIMIT 10";
+        $shippings = $this->db->query($sql, array($username))->result();
+        if($shippings === null)
+            $shippings = false;
+        
+        // User identified -> get packs
+        $sql = "SELECT *
+            FROM ".$this->db->dbprefix('shipping_pack')." sp
+            LEFT JOIN ".$this->db->dbprefix('shipping')." s ON (sp.`id_shipping` = s.`id_shipping`)
+            LEFT JOIN ".$this->db->dbprefix('pack')." p ON (sp.`id_pack` = p.`id_pack`)
+            WHERE s.`username` = ?
+            ORDER BY s.`date_delivery` DESC
+            LIMIT 10";
+        $packs = $this->db->query($sql, array($username))->result();
+        if($packs === null)
+            $packs = false;
+        
+        // User identified -> get packs outbound packs (unreturned packs)
+        $sql = "SELECT *
+            FROM ".$this->db->dbprefix('shipping_pack')." sp
+            LEFT JOIN ".$this->db->dbprefix('shipping')." s ON (sp.`id_shipping` = s.`id_shipping`)
+            LEFT JOIN ".$this->db->dbprefix('pack')." p ON (sp.`id_pack` = p.`id_pack`)
+            WHERE s.`username` = ?
+            AND sp.`inbound` = 0
+            GROUP BY sp.`id_pack`
+            ORDER BY p.`barcode`";
+        $packs_outbound = $this->db->query($sql, array($username))->result();
+        if($packs_outbound === null)
+            $packs_outbound = false;
+        
+        $result = array(
+            'username' => $user->username,
+            'shippings' => $shippings,
+            'packs' => $packs,
+            'packs_outbound' => $packs_outbound,
+        );
+     
+        return $result;
     }
     
     

@@ -606,6 +606,7 @@ class Importreferences extends My_Controller {
                             'message' => 'Update of shipping : '.trim($value[0]).' with former username "'.$shipping->username.'" updated to "'.trim($value[1]).'"'
                         );
                     }
+                    // Update of date delivery if necessary
                     if($shipping->date_delivery != trim($value[2]))
                     {                    
                         $success[] = array(

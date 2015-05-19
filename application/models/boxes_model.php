@@ -25,7 +25,7 @@ class Boxes_Model extends CI_Model {
     /*
      * Get the all the boxes with a current count_outbound
      */
-    public function getAll($p = null, $n = null, $orderby = null, $filter = null)
+    public function getAll($p = null, $n = null, $orderby = null, $filter = null, $status = null)
     {
         $p = (is_numeric($p) ? $p - 1 : null);
         
@@ -55,6 +55,21 @@ class Boxes_Model extends CI_Model {
             }
         }
         
+        if($status == 1)
+        {
+            if(isset($where_str))
+                $where_str .= ' AND (SELECT COUNT(`id_shipping_pack`) FROM ao_shipping_pack WHERE `inbound` = 0 AND `id_pack` = p.`id_pack`) = 0 ';
+            else
+                $where_str = ' WHERE (SELECT COUNT(`id_shipping_pack`) FROM ao_shipping_pack WHERE `inbound` = 0 AND `id_pack` = p.`id_pack`) = 0 ';
+        }
+        if($status == 2)
+        {
+            if(isset($where_str))
+                $where_str .= ' AND (SELECT COUNT(`id_shipping_pack`) FROM ao_shipping_pack WHERE `inbound` = 0 AND `id_pack` = p.`id_pack`) > 0 ';
+            else
+                $where_str = ' WHERE (SELECT COUNT(`id_shipping_pack`) FROM ao_shipping_pack WHERE `inbound` = 0 AND `id_pack` = p.`id_pack`) > 0 ';
+        }
+            
         $sql = "SELECT *,
                 (SELECT COUNT(`id_shipping_pack`) FROM ao_shipping_pack WHERE `inbound` = 0 AND `id_pack` = p.`id_pack`) as count_outbound,
                 (SELECT @id_shipping_pack := MAX(`id_shipping_pack`) FROM ao_shipping_pack WHERE `id_pack` = p.`id_pack`) as `id_shipping_pack`,
@@ -72,6 +87,7 @@ class Boxes_Model extends CI_Model {
         if ( $result !== null )
         {
             $rows = $result->result();
+            
             // set the status to in = 0 or to out = 1
             foreach ($rows as $k => &$v)
             {
@@ -79,25 +95,30 @@ class Boxes_Model extends CI_Model {
                     $v->status = 0;
                 else
                     $v->status = 1;
-                // Retrieve all the rows for multiple outbounds
+                
+                // Retrieve all the rows for multiple outbounds i.e. mulitple shippings
                 if($v->count_outbound > 1)
                 {
                     $sql = "SELECT *
                         FROM ".$this->db->dbprefix('shipping_pack')." sp
+                        LEFT JOIN ".$this->db->dbprefix('shipping')." s ON (sp.`id_shipping` = s.`id_shipping`)
                         WHERE sp.`id_pack` = ?
                         AND sp.`inbound` = 0";
-                    $result = $this->db->query($sql, array((int)$v->id_pack));
+                    $shippings = $this->db->query($sql, array((int)$v->id_pack))->result();
+                    if($shippings !== null)
+                        $v->shippings = $shippings;
                 }
             }
+            
 			return $rows;
         }
         else
             return false;
     }
     
-    public function getAllCount($filter = null)
+    public function getAllCount($filter = null, $status = null)
     {
-        $result = $this->getAll(null, null, null, $filter);
+        $result = $this->getAll(null, null, null, $filter, $status);
         return count($result);
     }
     
@@ -151,10 +172,20 @@ class Boxes_Model extends CI_Model {
         if(empty($id))
             return false;
         
-        $sql = "SELECT * 
-                FROM ".$this->db->dbprefix('shipping_pack')."
-                WHERE `id_pack` = ?
-                ORDER BY `id_shipping_pack`";
+        $sql = "SELECT *,
+                    u_out.`firstname` as out_firstname,
+                    u_out.`lastname` as out_lastname,
+                    u_in.`firstname` as in_firstname,
+                    u_in.`lastname` as in_lastname,
+                    s.`username` as customer
+                FROM ".$this->db->dbprefix('shipping_pack')." sp
+                LEFT JOIN ".$this->db->dbprefix('shipping')." s ON (sp.`id_shipping` = s.`id_shipping`)
+                LEFT JOIN ".$this->db->dbprefix('pack')." p ON (sp.`id_pack` = p.`id_pack`)
+                LEFT JOIN ".$this->db->dbprefix('user')." u_out ON (sp.`id_user_outbound` = u_out.`id_user`)
+                LEFT JOIN ".$this->db->dbprefix('user')." u_in ON (sp.`id_user_inbound` = u_in.`id_user`)
+                WHERE sp.`id_pack` = ?
+                ORDER BY s.`date_delivery` DESC, sp.`date_inbound`";
+
         $result = $this->db->query($sql,array((int)$id));
         if ( $result !== null )
 			return $result->result();
@@ -235,48 +266,81 @@ class Boxes_Model extends CI_Model {
     /*
      * Get status of a given barcode
      */
-    public function getStatusByBarcode($barcode)
+    public function getQuickSearchByBarcode($barcode)
     {
         $sql = "SELECT *
             FROM ".$this->db->dbprefix('pack')." p
             WHERE p.`barcode` = ?";
-        $result = $this->db->query($sql, array($barcode))->row();
+        $pack = $this->db->query($sql, array($barcode))->row();
         
-        if($result === null)
+        if($pack === null)
             return false;
         
-        if(isset($result->id_pack))
-            $id_pack = (int)$result->id_pack;
+        if(isset($pack->id_pack))
+            $id_pack = (int)$pack->id_pack;
         else
             return false;
         
-        $sql = "SELECT *,
-                (SELECT @id_shipping_pack := MAX(`id_shipping_pack`) FROM ao_shipping_pack WHERE `id_pack` = p.`id_pack`) as `id_shipping_pack`,
-                (SELECT `inbound` FROM ao_shipping_pack WHERE `id_shipping_pack` = @id_shipping_pack) as `inbound`,
-                (SELECT `outbound` FROM ao_shipping_pack WHERE `id_shipping_pack` = @id_shipping_pack) as `outbound`,
-                (SELECT `date_outbound` FROM ao_shipping_pack WHERE `id_shipping_pack` = @id_shipping_pack) as `date_outbound`,
-                (SELECT `date_inbound` FROM ao_shipping_pack WHERE `id_shipping_pack` = @id_shipping_pack) as `date_inbound`,
-                (SELECT `reference` FROM ao_shipping_pack WHERE `id_shipping_pack` = @id_shipping_pack) as `reference`
-            FROM ".$this->db->dbprefix('pack')." p
-            WHERE p.`id_pack` = ?";
-        
-        $result = $this->db->query($sql, array($id_pack));
-        
-        if ( $result !== null )
+        // id_pack is present -> continue
+        // Check if there is history for the pack
+        $sql = "SELECT *
+            FROM ".$this->db->dbprefix('shipping_pack')." sp
+            LEFT JOIN ".$this->db->dbprefix('shipping')." s ON (sp.`id_shipping` = s.`id_shipping`)
+            WHERE sp.`id_pack` = ?
+            ORDER BY s.`date_delivery` DESC";
+        $shippings = $this->db->query($sql, array($id_pack))->result_array();
+
+        if($shippings === null)
         {
-            $rows = $result->result();
-            // set the status to in = 0 or to out = 1
-            foreach ($rows as $k => &$v)
-            {
-                if( ($v->outbound == 1 && $v->inbound == 1) || ($v->outbound === null && $v->inbound === null) )
-                    $v->status = 0;
-                else
-                    $v->status = 1;
-            }
-			return $rows;
+            // Pack has no history -> consider has beeing IN
+            $status = false;
+            $history = false;
         }
         else
-            return false;
+        {
+            // Pack has history -> determine current status
+            // Check if it is still outbound
+            $sql = "SELECT *
+                FROM ".$this->db->dbprefix('shipping_pack')." sp
+                LEFT JOIN ".$this->db->dbprefix('shipping')." s ON (sp.`id_shipping` = s.`id_shipping`)
+                WHERE sp.`id_pack` = ?
+                AND sp.`inbound` = 0";
+            $shippings_out = $this->db->query($sql, array($id_pack))->result();
+            // Pack is still outbound
+            if($shippings_out !== null)
+            {
+                $status = array(
+                    'status' => true, // Status = true => is outbound
+                    'packs' => $shippings_out,
+                );
+            }
+            else
+                // Pack is not outbound
+                $status = array('status' => false);
+                
+            // Get the previous shipping(s) if any
+            $sql = "SELECT *
+                FROM ".$this->db->dbprefix('shipping_pack')." sp
+                LEFT JOIN ".$this->db->dbprefix('shipping')." s ON (sp.`id_shipping` = s.`id_shipping`)
+                WHERE sp.`id_pack` = ?
+                AND sp.`inbound` = 1
+                ORDER BY s.`date_delivery` DESC";
+            $shippings_cycle = $this->db->query($sql, array($id_pack))->result();
+
+            if($shippings_cycle === null)
+                $history = false;
+            else
+                $history = $shippings_cycle;   
+        }
+        
+        $result = array(
+            'id_pack' => $id_pack,
+            'barcode' => $pack->barcode,
+            'status' => $status,
+            'history' => $history,
+        );
+ 
+        return $result;
     }
     
     public function getByBarcode($ref)

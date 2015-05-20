@@ -121,16 +121,17 @@ class Importreferences extends My_Controller {
                     
                     if(count($username_missmatch) > 0)
                     {
-                        $msg = 'Shippings : '.implode(', ', $set['SH']).' are not for the same username. List of the shippings with their username : <b />';
+                        $msg = 'Shippings : '.implode(', ', $set['SH']).' are not for the same username. List of the shippings with their username : <br />';
                         foreach ($set_sh as $sh)
                         {
-                            $msg .= $sh->reference.' | '.$sh->username.'<br />';
+                            $msg .= '<strong>'.$sh->reference.' | '.$sh->username.'</strong><br />';
                         }
                         
                         $failed[] = array(
                             'tag' => 'Username missmatch',
                             'message' => $msg,
                         );
+                        // In case of username missmatch for the shippings, the full set is discarded
                         continue;
                     }
                     
@@ -139,16 +140,16 @@ class Importreferences extends My_Controller {
                     
                     $buffer_pack = array();
                     // Check each pack in order to know if one is assigned to a shipping not from the current set
-                    foreach($set['P'] as $p)
+                    foreach($set['P'] as $p_barcode)
                     {
                         $this->load->model('boxes_model');
                         // First check if the pack is known
-                        $_p = $this->boxes_model->getByBarcode($p);
+                        $_p = $this->boxes_model->getByBarcode($p_barcode);
                         // Pack is missing, so add it
                         if(!$_p)
                         {
                             $data = array(
-                                'barcode' => $p,
+                                'barcode' => $p_barcode,
                                 'date_add' => date('Y-m-d H:i:s'),
                                 'date_upd' => date('Y-m-d H:i:s'),
                             );
@@ -156,12 +157,53 @@ class Importreferences extends My_Controller {
                             $id_pack = $this->db->insert_id();
                             $success[] = array(
                                 'tag' => 'New pack added',
-                                'message' => 'Missing pack <strong>'.$p.'</strong> was added',
+                                'message' => 'Missing pack <strong>'.$p_barcode.'</strong> was added',
                             );
                         }
                         else
                             $id_pack = $_p->id_pack;
-                        $buffer_pack[] = $id_pack;
+                        $buffer_pack[$id_pack] = $p_barcode;
+                    }
+                    
+                    // Check based on the packs in buffer_pack if they are not already assigned to another shipping
+                    // and if so, if the shippings are for the same username
+                    foreach ($buffer_pack as $p_id => $p_barcode)
+                    {
+                        // Get the current username for this pack in case of outbound
+                        $sql = "SELECT * 
+                                FROM ".$this->db->dbprefix('shipping_pack')." sp
+                                LEFT JOIN ".$this->db->dbprefix('shipping')." s ON (sp.id_shipping = s.id_shipping)
+                                WHERE sp.id_pack = ?
+                                AND sp.inbound = 0
+                                GROUP BY username";
+                        $result = $this->db->query($sql,array((int)$p_id));
+                        // One result : So far so good if the username is the right one
+                        if($result->num_rows() == 1)
+                        {
+                            $row = $result->row();
+                            // If pack is in conflict -> do not handle it and notify it
+                            if(strcasecmp($row->username, $username) != 0)
+                            {
+                                $failed[] = array(
+                                    'tag' => 'Pack with username missmatch',
+                                    'message' => 'Can\'t add pack '.$p_barcode.' to shipping'.(count($set['SH']) > 1 ? 's ':'')
+                                        .': <strong>'.implode(', ', $set['SH']).'</strong> assigned to customer <strong>'.$username.'</strong>.'
+                                        .' It is already in outbound for shipping <strong>'.$row->reference.'</strong> for customer <strong>'.$row->username.'</strong>',
+                                );
+                                // Remove this pack from buffer_pack
+                                $packs_to_be_removed[] = $p_id;
+                            }
+                        }
+                        // Definately not good: This pack is already assigned to multiple usernames and in outbound state
+                        // this is virualy impossible, though remove it
+                        elseif($result->num_rows() > 1)
+                            $packs_to_be_removed[] = $p_id;
+                    }
+                    // Remove packs if needed
+                    if(isset($packs_to_be_removed))
+                    {
+                        foreach ($packs_to_be_removed as $v) 
+                            unset($buffer_pack[$v]);
                     }
                     
                     // Everything is ready to insert shipping -> pack
@@ -169,18 +211,18 @@ class Importreferences extends My_Controller {
                     foreach ($set_sh as $sh)
                     {
                         
-                        foreach ($buffer_pack as $p)
+                        foreach ($buffer_pack as $p_id => $p_barcode)
                         {
                             // First check if the record exists in order to avoid duplicates
                             $sql = "SELECT * 
                                     FROM ".$this->db->dbprefix('shipping_pack')."
                                     WHERE `id_pack` = ? 
                                     AND `id_shipping` = ?";
-                            $result = $this->db->query($sql,array((int)$p, (int)$sh->id_shipping));
+                            $result = $this->db->query($sql,array((int)$p_id, (int)$sh->id_shipping));
                             if($result->num_rows() == 0)
                             {
                                 $data = array(
-                                    'id_pack' => $p,
+                                    'id_pack' => (int)$p_id,
                                     'id_shipping' => (int)$sh->id_shipping,
                                     'outbound' => true,
                                     'id_user_outbound' => getUserId(),
@@ -191,7 +233,7 @@ class Importreferences extends My_Controller {
                                 $this->db->insert('shipping_pack',$data);
                                 $success[] = array(
                                     'tag' => 'Outbound added',
-                                    'message' => 'Pack '.$p.' added as outbound for shipping '.$sh->reference,
+                                    'message' => 'Pack '.$p_barcode.' added as outbound for shipping '.$sh->reference,
                                 );
                             }
                         }

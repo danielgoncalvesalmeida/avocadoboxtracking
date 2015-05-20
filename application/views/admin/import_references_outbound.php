@@ -94,7 +94,7 @@
             <div class="panel-body">
 
             <?php 
-                foreach ($success as $shipping => $packs): ?>
+                foreach ($success as $item): ?>
                 <div class="row">
                     <div class="col-md-12">
                         <strong><?php echo $item['tag'] ?></strong>

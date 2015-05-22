@@ -54,18 +54,19 @@
             
         <?php if (_cr('boxes') || 1==1 ): ?>
         <!-- Boxes menu -->
-          <li class="dropdown"><a class="dropdown-toggle"  data-toggle="dropdown" href="#">Packs <b class="caret"></b></a>
-                <ul class="dropdown-menu" >
-                    <li><a href="<?php echo sbase_url() ?>admin/box">View all</a></li>
-                </ul>
+          <li>
+              <a href="<?php echo sbase_url() ?>admin/box">Packs</a>
           </li>
         <?php endif; ?>
           
         <!-- Shipping menu -->
-          <li class="dropdown"><a class="dropdown-toggle"  data-toggle="dropdown" href="#">Shippings <b class="caret"></b></a>
-                <ul class="dropdown-menu" >
-                    <li><a href="<?php echo sbase_url() ?>admin/shipping">View all</a></li>
-                </ul>
+          <li>
+              <a href="<?php echo sbase_url() ?>admin/shipping">Shippings</a>
+          </li>
+          
+        <!-- Log menu -->
+          <li>
+              <a href="<?php echo sbase_url() ?>admin/log">Log</a>
           </li>
       
           
@@ -96,9 +97,9 @@
           <li class="dropdown"><a class="dropdown-toggle"  data-toggle="dropdown" href="#"><?php echo $this->session->userdata('firstname').' '.$this->session->userdata('lastname') ?> <b class="caret"></b></a>
             <ul class="dropdown-menu" >
               <!-- <li><a href="#">Congés</a></li> -->
-              <li><a href="<?php echo sbase_url() ?>admin/employees/editpassword">Changer password</a></li>
+              <li><a href="<?php echo sbase_url() ?>admin/employees/editpassword">Change password</a></li>
               <li class="divider"></li>
-              <li><a href="<?php echo sbase_url() ?>signin/logout">Déconnecter</a></li>
+              <li><a href="<?php echo sbase_url() ?>signin/logout">Log out</a></li>
             </ul>
           </li>
         </ul>

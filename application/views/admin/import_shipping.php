@@ -49,7 +49,7 @@
             <div class="panel-body">
             <?php foreach ($failed as $item ): ?>
                 <div class="row">
-                    <div class="col-md-12">Line <strong><?php echo $item['line'] ?></strong> | <?php echo $item['message'] ?><br /></div>
+                    <div class="col-md-12"><?php if(isset($item['line']) && !empty($item['line'])): ?>Line <strong><?php echo $item['line'] ?></strong> | <?php endif; ?><?php echo $item['message'] ?><br /></div>
                 </div>
             <?php endforeach; ?>
             </div>

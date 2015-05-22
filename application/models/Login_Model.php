@@ -32,19 +32,6 @@ class Login_Model extends CI_Model {
                 AND u.`active` = 1";
             $result = $this->db->query($sql, array($user->id_user));
             $user = $result->row();
-            
-            /*
-             *  Deprecated - Delete pending
-             *
-            // Retrieve rights
-            $sql = "SELECT * 
-                FROM ".$this->db->dbprefix('user_rights')." 
-                WHERE `id_user` = ".(int)$user->id_user."
-                AND `id_domain` = ".(int)$user->id_domain;
-            $result = $this->db->query($sql);
-            $rights = $result->result_array();
-             * 
-             */
 
            $data = array(
                'zone' => 'app',
@@ -58,11 +45,20 @@ class Login_Model extends CI_Model {
            );
            $this->session->set_userdata($data);
 
+            $this->load->model('log_model');
+            $this->log_model->log(array('type' => 1, 'operation' => 7, 'message_short' => 'Successful authentication', 'message' => 'Username '.$this->db->escape($usr).' has successful logged in' ));
+           
             if(!empty($redirect))
                 redirect($redirect);
             else
                 redirect('admin/home');
-		} else {
+		}
+        else
+        {
+            // Log and return false
+            $this->load->model('log_model');
+            $this->log_model->log(array('type' => 2, 'operation' => 6, 'message_short' => 'Username/password failure', 'message' => 'Authentication failure for username '.$this->db->escape($usr)));
+            
 			return false;
 		}
 

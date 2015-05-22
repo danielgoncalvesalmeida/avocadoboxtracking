@@ -143,8 +143,8 @@ class Employees extends MY_Controller {
   
         if($this->input->post('submitSave'))
         {
-            $this->form_validation->set_rules('edpassword1','password 1','trim|required|min_length[3]|integer|xss_clean');
-            $this->form_validation->set_rules('edpassword2','password 2','trim|required|matches[edpassword1]|xss_clean');
+            $this->form_validation->set_rules('edpassword1','password 1','trim|required|min_length[3]');
+            $this->form_validation->set_rules('edpassword2','password 2','trim|required|matches[edpassword1]');
             if ($this->form_validation->run())
             {
                 $data['password'] = sha1($this->config->item('salt').$this->input->post('edpassword1'));
@@ -152,13 +152,16 @@ class Employees extends MY_Controller {
                 
                 $this->db->where('id_user',(int)getUserId());
                 $this->db->update('user',$data);
-                $dview['flash_success'] = 'Votre nouveau password fut enregistré avec succès';
+                $dview['flash_success'] = 'Your new password was successfully saved';
+                
+                $this->load->model('log_model');
+                $this->log_model->log(array('type' => 1, 'operation' => 5, 'message' => 'User successfully changed his password'));
             }
             else
                 $dview['flash_error'] = validation_errors();
         }
         
-        $dview['link_back'] = 'admin/desktop';
+        $dview['link_back'] = 'admin/dashboard';
         $this->display('employees_editpassword',$dview);
     }
     

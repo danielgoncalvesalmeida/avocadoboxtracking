@@ -30,10 +30,10 @@
 
     
     <div class="form-group <?php echo (strlen(form_error('edpassword1')) > 0 ? 'has-error' : '' ) ?>" id="cgPassword1">
-        <label class="col-sm-2 control-label" for="iPassword1">Nouveau code d'accès (min 3 chiffres)</label>
+        <label class="col-sm-2 control-label" for="iPassword1">New password</label>
         <div class="col-sm-4">
-            <input class="form-control" type="password" name="edpassword1" id="iPassword1" placeholder="indiquez votre nouveau code d'accès" value="">
-            <span class="help-block msg-required" style="display:none" >Champ obligatoire</span>
+            <input class="form-control" type="password" name="edpassword1" id="iPassword1" placeholder="type in your new password" value="">
+            <span class="help-block msg-required" style="display:none" >Mandatory field</span>
             <?php if(strlen(form_error('edpassword1')) > 0): ?>
                 <span class="help-block"><?php echo form_error('edpassword1') ?></span>
             <?php endif; ?>
@@ -41,10 +41,10 @@
     </div>
 
     <div class="form-group <?php echo (strlen(form_error('edpassword2')) > 0 ? 'has-error' : '' ) ?>" id="cgPassword2">
-        <label class="col-sm-2 control-label" for="iPassword2">Confirmez le nouveau code</label>
+        <label class="col-sm-2 control-label" for="iPassword2">Confirm new password</label>
         <div class="col-sm-4">
-            <input class="form-control" type="password" name="edpassword2" id="iPassword2" placeholder="confirmez votre nouveau code d'accès" value="">
-            <span class="help-block msg-required" style="display:none">Champ obligatoire</span>
+            <input class="form-control" type="password" name="edpassword2" id="iPassword2" placeholder="confirm your new password" value="">
+            <span class="help-block msg-required" style="display:none">Mandatory field</span>
             <?php if(strlen(form_error('edpassword2')) > 0): ?>
                 <span class="help-block"><?php echo form_error('edpassword2') ?></span>
             <?php endif; ?>
@@ -56,9 +56,9 @@
         <div class="col-md-12">
         <div class="form-group">
             <div class="col-xs-12 col-sm-offset-2 col-sm-4">
-                <input type="submit" class="btn btn-primary" name="submitSave" id="submitSave" value="Enregistrer">
+                <input type="submit" class="btn btn-primary" name="submitSave" id="submitSave" value="Save">
                 &nbsp;&nbsp;
-                <a class="btn btn-danger" href="<?php echo (empty($link_back) ? sbase_url().'admin/employees/' : sbase_url().$link_back ) ?>">Annuler</a>
+                <a class="btn btn-danger" href="<?php echo (empty($link_back) ? sbase_url().'admin/dashboard/' : sbase_url().$link_back ) ?>">Cancel</a>
             </div>
         </div>
 

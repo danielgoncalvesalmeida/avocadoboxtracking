@@ -12,7 +12,7 @@ $config['appname'] = 'Boxtracking';
 $config['use_https'] = FALSE;
 
 // Default results per page
-$config['results_per_page_default'] = 2;
+$config['results_per_page_default'] = 25;
 
 /*
  	========================================

@@ -7,6 +7,8 @@ class Importreferences extends My_Controller {
         $this->layout = 'admin';
         parent::__construct();
         $this->isZone('app');
+        $this->addJs('tabs.js');
+        $this->load->model('log_model');
     }
     
 	public function index()
@@ -27,10 +29,19 @@ class Importreferences extends My_Controller {
         {
             if(isset($_FILES['edfile']['name']) && !empty($_FILES['edfile']['name']))
             {
+                $this->log_model->log(array('type' => 1, 'operation' => 1, 'message' => 'Upload of file : '.$_FILES['edfile']['name']));
                 $refs = $this->csvToArray($_FILES['edfile']['tmp_name']);
-                $result = $this->parseShippingsAndSave($refs);
-                $dview['success'] = (isset($result['success'])? $result['success'] : null );
-                $dview['failed'] = (isset($result['failed'])? $result['failed'] : null );
+                if(count($refs) == 0)
+                {
+                    $dview['failed'][] = array('message' => 'Uploaded file is empty');
+                    $this->log_model->log(array('type' => 1, 'operation' => 1, 'message' => 'Uploaded file is empty'));
+                }
+                else
+                {
+                    $result = $this->parseShippingsAndSave($refs);
+                    $dview['success'] = (isset($result['success'])? $result['success'] : null );
+                    $dview['failed'] = (isset($result['failed'])? $result['failed'] : null );
+                }
             }
             
         } 
@@ -48,23 +59,40 @@ class Importreferences extends My_Controller {
         
         if($isSubmit)
         {
-            if(isset($_FILES['edfile']['name']) && !empty($_FILES['edfile']['name']))
-            {
-                $refs = $this->txtFileToArray($_FILES['edfile']['tmp_name']);
-                $result = $this->parseOutboundReferences($refs);   
-            }
-            elseif(isset($_POST['edreferences']) && !empty($_POST['edreferences']))
-            {
-                $edrefs = $_POST['edreferences'];
-                $refs = explode("\n", str_replace("\r", "", $edrefs));
-                $result = $this->parseOutboundReferences($refs);
-            }
-            
             $failed = array();
             $success = array();
             
+            if(isset($_FILES['edfile']['name']) && !empty($_FILES['edfile']['name']))
+            {
+                $this->log_model->log(array('type' => 1, 'operation' => 2, 'message' => 'Upload of file : '.$_FILES['edfile']['name']));
+                $refs = $this->txtFileToArray($_FILES['edfile']['tmp_name']);
+                
+                if(count($refs) == 0)
+                {
+                    $failed[] = array('message' => 'Uploaded file is empty');
+                    $this->log_model->log(array('type' => 1, 'operation' => 2, 'message' => 'Uploaded file is empty'));
+                }
+                else
+                    $result = $this->parseOutboundReferences($refs);   
+            }
+            elseif(isset($_POST['edreferences']) && !empty($_POST['edreferences']))
+            {
+                $this->log_model->log(array('type' => 1, 'operation' => 2, 'message' => 'References manually added'));
+                $edrefs = $_POST['edreferences'];
+                $refs = explode("\n", str_replace("\r", "", $edrefs));
+                if(count($refs) == 0)
+                {
+                    $failed[] = array('message' => 'No references have been provided');
+                    $this->log_model->log(array('type' => 1, 'operation' => 2, 'message' => 'Manuallay provided references is empty'));
+                }
+                else
+                    $result = $this->parseOutboundReferences($refs);
+            }
+            
+            
+            
             // Add the parsed boxes to the log
-            if(isset($result['sets']))
+            if(isset($result['sets']) && count($result['sets']) > 0)
             {
                 $this->load->model('shipping_model');
                 foreach ($result['sets'] as $set)
@@ -100,6 +128,7 @@ class Importreferences extends My_Controller {
                         else
                             $msg = 'Shipping : '.$sh.' is unknown';
                         
+                        $this->log_model->log(array('type' => 3, 'operation' => 2, 'message_short' => 'One or more shippings are unknown', 'message' => $msg));
                         $failed[] = array(
                             'tag' => 'One or more shippings are unknown',
                             'message' => $msg,
@@ -127,6 +156,7 @@ class Importreferences extends My_Controller {
                             $msg .= '<strong>'.$sh->reference.' | '.$sh->username.'</strong><br />';
                         }
                         
+                        $this->log_model->log(array('type' => 3, 'operation' => 2, 'message_short' => 'Username missmatch', 'message' => $msg));
                         $failed[] = array(
                             'tag' => 'Username missmatch',
                             'message' => $msg,
@@ -155,6 +185,8 @@ class Importreferences extends My_Controller {
                             );
                             $this->db->insert('pack',$data);
                             $id_pack = $this->db->insert_id();
+                            
+                            $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'New pack added', 'message' => $msg));
                             $success[] = array(
                                 'tag' => 'New pack added',
                                 'message' => 'Missing pack <strong>'.$p_barcode.'</strong> was added',
@@ -184,12 +216,14 @@ class Importreferences extends My_Controller {
                             // If pack is in conflict -> do not handle it and notify it
                             if(strcasecmp($row->username, $username) != 0)
                             {
-                                $failed[] = array(
-                                    'tag' => 'Pack with username missmatch',
-                                    'message' => 'Can\'t add pack '.$p_barcode.' to shipping'.(count($set['SH']) > 1 ? 's ':'')
+                                $msg = 'Can\'t add pack '.$p_barcode.' to shipping'.(count($set['SH']) > 1 ? 's ':'')
                                         .': <strong>'.implode(', ', $set['SH']).'</strong> assigned to customer <strong>'.$username.'</strong>.'
-                                        .' It is already in outbound for shipping <strong>'.$row->reference.'</strong> for customer <strong>'.$row->username.'</strong>',
+                                        .' It is already in outbound for shipping <strong>'.$row->reference.'</strong> for customer <strong>'.$row->username.'</strong>';
+                                $failed[] = array(
+                                    'tag' => 'Pack discarded due to username missmatch',
+                                    'message' => $msg,
                                 );
+                                $this->log_model->log(array('type' => 3, 'operation' => 2, 'message_short' => 'Pack discarded due to username missmatch', 'message' => $msg));
                                 // Remove this pack from buffer_pack
                                 $packs_to_be_removed[] = $p_id;
                             }
@@ -235,6 +269,15 @@ class Importreferences extends My_Controller {
                                     'tag' => 'Outbound added',
                                     'message' => 'Pack '.$p_barcode.' added as outbound for shipping '.$sh->reference,
                                 );
+                                $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'Outbound added', 'message' => 'Pack '.$p_barcode.' added as outbound for shipping '.$sh->reference));
+                            }
+                            else
+                            {
+                                $success[] = array(
+                                    'tag' => 'Outbound already exists',
+                                    'message' => 'Pack '.$p_barcode.' is already an outbound for shipping '.$sh->reference,
+                                );
+                                $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'Outbound already exists', 'message' => 'Pack '.$p_barcode.' is already an outbound for shipping '.$sh->reference));
                             }
                         }
                     }
@@ -242,7 +285,13 @@ class Importreferences extends My_Controller {
                     
                     
                     
-                }
+                } // End of sets foreach
+            }
+            else
+            // result contains no sets
+            {
+                $failed[] = array('message' => 'No shipping sets found in provided references');
+                $this->log_model->log(array('type' => 2, 'operation' => 1, 'message_short' => 'No shipping sets found', 'message' => 'No shipping sets found in provided references'));
             }
             
       
@@ -263,20 +312,29 @@ class Importreferences extends My_Controller {
         
         if($isSubmit)
         {
+            $failed = array();
+            $success = array();
+            
             if(isset($_FILES['edfile']['name']) && !empty($_FILES['edfile']['name']))
             {
+                $this->log_model->log(array('type' => 1, 'operation' => 3, 'message' => 'Upload of file : '.$_FILES['edfile']['name']));
                 $refs = $this->txtFileToArray($_FILES['edfile']['tmp_name']);
                 $packs = $this->parseInboundReferences($refs);   
             }
             elseif(isset($_POST['edreferences']) && !empty($_POST['edreferences']))
             {
+                $this->log_model->log(array('type' => 1, 'operation' => 3, 'message' => 'References manually added'));
                 $edrefs = $_POST['edreferences'];
                 $refs = explode("\n", str_replace("\r", "", $edrefs));
                 $packs = $this->parseInboundReferences($refs);
             }
             
-            $failed = array();
-            $success = array();
+            if(isset($packs) && count($packs) == 0)
+            {
+                $failed[] = array('message' => 'No references found');
+                $this->log_model->log(array('type' => 1, 'operation' => 3, 'message' => 'No references found'));
+            }
+            
             
             // Add the parsed boxes to the log
             if(isset($packs) && is_array($packs) && count($packs) > 0)
@@ -296,6 +354,7 @@ class Importreferences extends My_Controller {
                             'tag' => 'Unidentified pack',
                             'message' => $pack.' is unknown'
                         );
+                        $this->log_model->log(array('type' => 2, 'operation' => 3, 'message_short' => 'Unidentified pack', 'message' => $pack.' is unknown'));
                         continue;
                     }
                     else
@@ -334,12 +393,14 @@ class Importreferences extends My_Controller {
                                 'tag' => 'Successful inbound',
                                 'message' => 'Pack <strong>'.$pack.'</strong> is inbound for '.(count($shippings)>1 ? 'shippings : '.implode(', ', $str_shippings) : 'shipping : '.implode(', ', $str_shippings) ),
                             );
+                            $this->log_model->log(array('type' => 1, 'operation' => 3, 'message_short' => 'Successful inbound', 'message' => 'Pack <strong>'.$pack.'</strong> is inbound for '.(count($shippings)>1 ? 'shippings : '.implode(', ', $str_shippings) : 'shipping : '.implode(', ', $str_shippings) ) ));
                         }
                         else
                             $failed[] = array(
                                 'tag' => 'Pack is already inbound',
                                 'message' => $pack.' is currently inbound',
                             );
+                            $this->log_model->log(array('type' => 3, 'operation' => 3, 'message_short' => $pack.' is currently inbound' ));
                     }
                     
                 }
@@ -591,6 +652,7 @@ class Importreferences extends My_Controller {
             if(!$this->isValidUsername($value[1]))
             {
                 $failed[] = array('line' => $key+1, 'message' => 'Invalid username');
+                $this->log_model->log(array('type' => 3, 'operation' => 1, 'message' => 'Invalid username'));
                 continue;
             }
             
@@ -600,12 +662,14 @@ class Importreferences extends My_Controller {
             if(count($date) != 3 || empty($value[2]))
             {
                 $failed[] = array('line' => $key+1, 'message' => 'Invalid delivery date');
+                $this->log_model->log(array('type' => 3, 'operation' => 1, 'message' => 'Invalid delivery date'));
                 continue;
             }
             
             if(!checkdate($date[1],$date[2],$date[0]))
             {
                 $failed[] = array('line' => $key+1, 'message' => 'Invalid delivery date');
+                $this->log_model->log(array('type' => 3, 'operation' => 1, 'message' => 'Invalid delivery date'));
                 continue;
             }
             
@@ -614,6 +678,7 @@ class Importreferences extends My_Controller {
             if(!$this->referenceIsValidShipping($value[0]))
             {
                 $failed[] = array('line' => $key+1, 'message' => 'Invalid shipping');
+                $this->log_model->log(array('type' => 3, 'operation' => 1, 'message' => 'Invalid shipping reference : '.$value[0]));
                 continue;
             }
             else
@@ -627,6 +692,7 @@ class Importreferences extends My_Controller {
                         'line' => $key+1, 
                         'message' => 'Add of shipping : '.trim($value[0])
                     );
+                    $this->log_model->log(array('type' => 1, 'operation' => 1, 'message' => 'Add of shipping : '.trim($value[0])));
                     $data = array(
                         'reference' => trim($value[0]),
                         'username' => trim($value[1]),
@@ -640,29 +706,46 @@ class Importreferences extends My_Controller {
                 else
                 {
                     $id_shipping = $shipping->id_shipping;
+                    $needsupdate = false;
                     // Update username if necessary
                     if($shipping->username != trim($value[1]))
-                    {                    
+                    {             
+                        $needsupdate = true;
                         $success[] = array(
                             'line' => $key+1, 
                             'message' => 'Update of shipping : '.trim($value[0]).' with former username "'.$shipping->username.'" updated to "'.trim($value[1]).'"'
                         );
+                        $this->log_model->log(array('type' => 1, 'operation' => 1, 'message' => 'Update of shipping : '.trim($value[0]).' with former username "'.$shipping->username.'" updated to "'.trim($value[1]).'"'));
                     }
                     // Update of date delivery if necessary
                     if($shipping->date_delivery != trim($value[2]))
-                    {                    
+                    {          
+                        $needsupdate = true;
                         $success[] = array(
                             'line' => $key+1, 
                             'message' => 'Update of date delivery : '.trim($value[0]).' with former date delivery "'.$shipping->date_delivery.'" updated to "'.trim($value[2]).'"'
                         );
+                        $this->log_model->log(array('type' => 1, 'operation' => 1, 'message' => 'Update of date delivery : '.trim($value[0]).' with former date delivery "'.$shipping->date_delivery.'" updated to "'.trim($value[2]).'"'));
                     }
-                    $data = array(
-                        'username' => trim($value[1]),
-                        'date_delivery' => trim($value[2]),
-                        'date_upd' => date('Y-m-d H:i:s'),
-                    );
-                    $this->db->where('id_shipping',(int)$id_shipping);
-                    $this->db->update('shipping',$data);
+                    
+                    if($needsupdate)
+                    {
+                        $data = array(
+                            'username' => trim($value[1]),
+                            'date_delivery' => trim($value[2]),
+                            'date_upd' => date('Y-m-d H:i:s'),
+                        );
+                        $this->db->where('id_shipping',(int)$id_shipping);
+                        $this->db->update('shipping',$data);
+                    }
+                    else
+                    {
+                        $success[] = array(
+                            'line' => $key+1, 
+                            'message' => 'Shipping '.trim($value[0]).' already exists and is up to date',
+                        );
+                        $this->log_model->log(array('type' => 1, 'operation' => 1, 'message' => 'Shipping '.trim($value[0]).' already exists and is up to date'));
+                    }
                     
                 }
             }

@@ -3,7 +3,30 @@ body {
     background-color: #fff;
 }
 
-.huge { font-size: 3em; }
+.current-status { 
+    padding: 10px; 
+    background: #f4f4f4;
+    border: 1px solid #e7e7e7;
+    border-radius: 5px;
+}
+
+.dashboard { border: #d9534f 1px solid; }
+
+.dashboard-success { border: #5cb85c 1px solid; }
+
+div.dashboard.panel.panel-danger div.panel-heading { background: #d9534f; }
+div.dashboard-success.panel.panel-success div.panel-heading { background: #5cb85c; }
+
+.huge { font-size: 3em; color: #fff; }
+
+.dashboard-label { color: #fff; }
+
+.import-panel { 
+    padding: 10px; 
+    background: #f8f8f8;
+    border: 1px solid #e7e7e7;
+    border-radius: 5px;
+}
 
 .quick-search-wrapper {
     padding: 15px;

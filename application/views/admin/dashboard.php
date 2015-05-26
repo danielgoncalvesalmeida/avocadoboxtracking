@@ -2,109 +2,122 @@
 
 <div class="row">
     
-    <div class="col-sm-6 col-md-3">
-       <div class="panel panel-danger">
-            <div class="panel-heading">
-                <div class="row">
-                    <div class="col-xs-3">
-                        <span class="glyphicon glyphicon-share huge"></span>
-                    </div>
-                    <div class="col-xs-9 text-right">
-                        <div class="huge"><?php echo (!empty($outbound_count) ? count($outbound_count) : '0') ?></div>
-                        <div>Boxes out</div>
-                    </div>
-                </div>
-            </div>
-            <a href="#">
-                <div class="panel-footer">
-                    <span class="pull-left"><a href="<?php echo sbase_url() ?>admin/box?filter[edbarcode]=&filter[edstatus]=2">View all</span>
-                    <span class="pull-right"><span class="glyphicon glyphicon-chevron-right"></span></span></a>
-                    <div class="clearfix"></div>
-                </div>
-            </a>
-        </div>
-    </div>
-    
-    <div class="col-sm-6 col-md-3">
-        <div class="panel panel-success">
-            <div class="panel-heading">
-                <div class="row">
-                    <div class="col-xs-3">
-                        <span class="glyphicon glyphicon-check huge"></span>
-                    </div>
-                    <div class="col-xs-9 text-right">
-                        <div class="huge"><?php echo (!empty($inbound_count) ? count($inbound_count) : '0') ?></div>
-                        <div>Boxes in</div>
-                    </div>
-                </div>
-            </div>
-            <a href="#">
-                <div class="panel-footer">
-                    <span class="pull-left"><a href="<?php echo sbase_url() ?>admin/box?filter[edbarcode]=&filter[edstatus]=1">View all</span>
-                    <span class="pull-right"><span class="glyphicon glyphicon-chevron-right"></span></span></a>
-                    <div class="clearfix"></div>
-                </div>
-            </a>
-        </div>
-    </div>
-    
-    <div class="col-sm-12 col-md-3">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <div class="row">
-                    <div class="col-xs-3">
-                        <span class="glyphicon glyphicon-check"></span>
-                    </div>
-                    <div class="col-xs-9">
-                        <div class="">Import shipping</div>
-                        <div>
-                            <a href="<?php echo sbase_url() ?>admin/importreferences/addshipping" class="btn btn-primary">Import shipping</a>
+    <div class="col-md-9">
+    <div class="current-status">
+        <h2>Currently</h2>
+        <div class="row">
+            <div class="col-sm-6 col-md-6">
+               <div class="dashboard panel panel-danger">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <span class="glyphicon glyphicon-share huge"></span>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge"><?php echo (!empty($outbound_count) ? count($outbound_count) : '0') ?></div>
+                                <div class="dashboard-label">Boxes out</div>
+                            </div>
                         </div>
                     </div>
+                    <a href="#">
+                        <div class="panel-footer">
+                            <span class="pull-left"><a href="<?php echo sbase_url() ?>admin/box?filter[edbarcode]=&filter[edstatus]=2">View all</span>
+                            <span class="pull-right"><span class="glyphicon glyphicon-chevron-right"></span></span></a>
+                            <div class="clearfix"></div>
+                        </div>
+                    </a>
                 </div>
             </div>
-            
-        </div>
-    </div>
     
-    <div class="col-sm-12 col-md-3">
-        
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <div class="row">
-                    <div class="col-xs-3">
-                        <span class="glyphicon glyphicon-check"></span>
-                    </div>
-                    <div class="col-xs-9">
-                        <div class="">Import outbound</div>
-                        <div>
-                            <a href="<?php echo sbase_url() ?>admin/importreferences/addoutbound" class="btn btn-primary">Submit outbound</a>
+    
+    
+            <div class="col-sm-6 col-md-6">
+                <div class="dashboard dashboard-success panel panel-success">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <span class="glyphicon glyphicon-check huge"></span>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge"><?php echo (!empty($inbound_count) ? count($inbound_count) : '0') ?></div>
+                                <div class="dashboard-label">Boxes in</div>
+                            </div>
                         </div>
                     </div>
+                    <a href="#">
+                        <div class="panel-footer">
+                            <span class="pull-left"><a href="<?php echo sbase_url() ?>admin/box?filter[edbarcode]=&filter[edstatus]=1">View all</span>
+                            <span class="pull-right"><span class="glyphicon glyphicon-chevron-right"></span></span></a>
+                            <div class="clearfix"></div>
+                        </div>
+                    </a>
                 </div>
             </div>
-            
         </div>
         
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <div class="row">
-                    <div class="col-xs-3">
-                        <span class="glyphicon glyphicon-check"></span>
-                    </div>
-                    <div class="col-xs-9">
-                        <div class="">Import inbound</div>
-                        <div>
-                            <a href="<?php echo sbase_url() ?>admin/importreferences/addinbound" class="btn btn-primary">Submit inbound</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
     </div>
+    </div>
+    
+    
+    
         
 </div>
+<br />
+<div class="row">
+    <div class="col-md-9">
+        
+        <div class="import-panel">
+            <h2>Import actions</h2>
+            <div class="row">
+                <div class="col-xs-12 col-sm-4 col-md-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            
+                            <p>Import shipping references</p>
+                            <div>
+                                <a href="<?php echo sbase_url() ?>admin/importreferences/addshipping" class="btn btn-primary">Import shipping</a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                
+                
+                <div class="col-xs-12 col-sm-4 col-md-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            
+                            <p>Import outbound references</p>
+                            <div>
+                                <a href="<?php echo sbase_url() ?>admin/importreferences/addoutbound" class="btn btn-primary">Submit outbound</a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                
+
+                
+                <div class="col-xs-12 col-sm-4 col-md-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            
+                            <p>Import inbound</p>
+                            <div>
+                                <a href="<?php echo sbase_url() ?>admin/importreferences/addinbound" class="btn btn-primary">Submit inbound</a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+               
+                
+            </div>
+        </div>
+        
+    </div>
+</div>
+<br />
 
 <div class="row">
     <div class="col-lg-6">

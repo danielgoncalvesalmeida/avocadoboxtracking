@@ -71,21 +71,25 @@
         </div>
     </div>
         
-    <!--
     <div class="col-md-2">
         <div class="form-group">
-            <label for="edreference">User</label>
-            <input type="text" class="form-control" id="edreference" name="filter[eduser]" placeholder="Enter the reference" value="<?php echo (isset($filter['edreference']) ? $filter['edreference'] : '') ?>">
+            <label for="">Date begin</label>
+            <div class="input-group" id="datetimepicker1">
+                <input type="text" class="form-control" id="eddatebegin" name="filter[eddatebegin]" placeholder="From date" value="<?php echo (isset($filter['eddatebegin']) ? $filter['eddatebegin'] : '') ?>">
+                <div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div>
+            </div>
         </div>
     </div>
-    
+        
     <div class="col-md-2">
         <div class="form-group">
-            <label for="edusername">Customer</label>
-            <input type="text" class="form-control" id="edusername" name="filter[edusername]" placeholder="Enter a username" value="<?php echo (isset($filter['edusername']) ? $filter['edusername'] : '') ?>">
+            <label for="">Date end</label>
+            <div class="input-group" id="datetimepicker2">
+                <input type="text" class="form-control" id="eddateend" name="filter[eddateend]" placeholder="To date" value="<?php echo (isset($filter['eddateend']) ? $filter['eddateend'] : '') ?>">
+                <div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div>
+            </div>
         </div>
     </div>
-    -->
         
     <div class="col-md-2">
         <div class="form-group">

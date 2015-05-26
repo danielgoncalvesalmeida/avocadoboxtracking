@@ -8,6 +8,11 @@ class Shipping extends My_Controller {
         parent::__construct();
         $this->isZone('app');
         $this->load->model('shipping_model');
+        
+        $this->addCss('bootstrap-datetimepicker.css');
+        $this->addJs('moment-with-locales.js');
+        $this->addJs('bootstrap-datetimepicker.js');
+        $this->addJs('admin_shipping.js');
     }
     
 	public function index()
@@ -30,15 +35,23 @@ class Shipping extends My_Controller {
             $filter_params = array(
                 'reference' => (isset($_GET['filter']['edreference']) ? $_GET['filter']['edreference'] : null),
                 'username' => (isset($_GET['filter']['edusername']) ? $_GET['filter']['edusername'] : null),
+                'datebegin' => (isset($_GET['filter']['eddatebegin']) && $_GET['filter']['eddatebegin'] > 0 ? $_GET['filter']['eddatebegin'] : null),
+                'dateend' => (isset($_GET['filter']['eddateend']) && $_GET['filter']['eddateend'] > 0 ? $_GET['filter']['eddateend'] : null),
             );
             $this->form_validation->set_data($filter_params);
             $this->form_validation->set_rules('reference','reference','alpha_numeric');
-            
+
             if ($this->form_validation->run())
             {
                 $filter = array();
-                $filter['reference'] = array('value' => $filter_params['reference'], 'wildcard' => '{}%');
-                $filter['username'] = array('value' => $filter_params['username'], 'wildcard' => '{}%');
+                if(!empty($filter_params['reference']))
+                    $filter[] = array('field' => 'reference', 'value' => $filter_params['reference'], 'wildcard' => '{}%');
+                if(!empty($filter_params['username']))
+                    $filter[] = array('field' => 'username', 'value' => $filter_params['username'], 'wildcard' => '{}%');
+                if(!empty($filter_params['datebegin']))
+                    $filter[] = array('field' => 's.date_delivery', 'value' => convert_dateToDbDate($filter_params['datebegin']), 'isdatetime_from' => true);
+                if(!empty($filter_params['dateend']))
+                    $filter[] = array('field' => 's.date_delivery', 'value' => convert_dateToDbDate($filter_params['dateend']), 'isdatetime_to' => true);
 
                 $dview['items'] = $this->shipping_model->getAll($this->p, $this->n, null, $filter);
                 $dview['items_count'] = $this->shipping_model->getAllCount($filter);

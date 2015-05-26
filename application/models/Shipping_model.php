@@ -34,24 +34,29 @@ class Shipping_Model extends CI_Model {
         {
             $where_str = 'WHERE 1 ';
     
-            foreach ($filter as $fname => $fvalue)
+            foreach ($filter as $fvalue)
             {
                 if(is_array($fvalue))
                 {
-                    if(isset($fvalue['value']))
+                    if(isset($fvalue['field']) && isset($fvalue['value']))
                     {
-                        $where_str .= ' AND '.$fname;
+                        $where_str .= ' AND '.$fvalue['field'];
                         // Consider as string
                         if(isset($fvalue['wildcard']))
                             $where_str .= ' LIKE '.$this->db->escape(str_replace('{}', $fvalue['value'], $fvalue['wildcard'])).' ';
                         // Consider as numeric (integer or currency)
                         if(isset($fvalue['isnumeric']))
                             $where_str .= ' = '.(int)$fvalue['value'].' ';
-                    }
-                    
+                        
+                        // Consider field as datetime
+                        if(isset($fvalue['isdatetime']))
+                            $where_str .= ' = \''.$fvalue['value'].'\' ';
+                        if(isset($fvalue['isdatetime_from']))
+                            $where_str .= ' >= \''.$fvalue['value'].'\' ';
+                        if(isset($fvalue['isdatetime_to']))
+                            $where_str .= ' <= \''.$fvalue['value'].' 23:59:59\' ';
+                    }  
                 }
-                else
-                    $where_str .= ' AND '.$fname.' = '.$this->db->escape($fvalue);
             }
         }
         $sql = "SELECT *,

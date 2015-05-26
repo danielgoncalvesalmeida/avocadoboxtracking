@@ -343,6 +343,21 @@ function getLinkBack($includeBaseUrl = true)
     return '';
 }
 
+/*
+ * Convert a date formated dd/mm/YYYY to DB date YYYY-MM-dd
+ */
+function convert_dateToDbDate($str)
+{
+    $date = explode('/', $str);
+    if(count($date) != 3)
+        return null;
+    if(!checkdate($date[1],$date[0],$date[2]))
+        return null;
+    
+    // Date is correct
+    return date_format(new DateTime($date[2].'-'.$date[1].'-'.$date[0]), 'Y-m-d');
+}
+
 
 /*
  * Make a string searchable

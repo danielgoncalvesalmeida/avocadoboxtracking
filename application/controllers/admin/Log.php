@@ -8,10 +8,11 @@ class Log extends My_Controller {
         parent::__construct();
         $this->isZone('app');
         $this->load->model('log_model');
+        
         $this->addCss('bootstrap-datetimepicker.css');
         $this->addJs('moment-with-locales.js');
         $this->addJs('bootstrap-datetimepicker.js');
-        $this->addJs('tabs.js');
+        $this->addJs('admin_log.js');
     }
     
 	public function index()
@@ -49,8 +50,10 @@ class Log extends My_Controller {
                 $filter[] = array('field' => 'u.id_user', 'value' => $filter_params['user'], 'isnumeric' => true);
                 $filter[] = array('field' => 'type', 'value' => $filter_params['type'], 'isnumeric' => true);
                 $filter[] = array('field' => 'operation', 'value' => $filter_params['operation'], 'isnumeric' => true);
-                $filter[] = array('field' => 'l.date_add', 'value' => convert_dateToDbDate($filter_params['datebegin']), 'isdatetime_from' => true);
-                $filter[] = array('field' => 'l.date_add', 'value' => convert_dateToDbDate($filter_params['dateend']), 'isdatetime_to' => true);
+                if(!empty($filter_params['datebegin']))
+                    $filter[] = array('field' => 'l.date_add', 'value' => convert_dateToDbDate($filter_params['datebegin']), 'isdatetime_from' => true);
+                if(!empty($filter_params['dateend']))
+                    $filter[] = array('field' => 'l.date_add', 'value' => convert_dateToDbDate($filter_params['dateend']), 'isdatetime_to' => true);
 
                 $dview['items'] = $this->log_model->getAll($this->p, $this->n, null, $filter);
                 $dview['items_count'] = $this->log_model->getAllCount($filter);

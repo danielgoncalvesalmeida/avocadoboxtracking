@@ -186,7 +186,7 @@ class Importreferences extends My_Controller {
                             $this->db->insert('pack',$data);
                             $id_pack = $this->db->insert_id();
                             
-                            $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'New pack added', 'message' => $msg));
+                            $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'New pack added', 'message' => 'Missing pack <strong>'.$p_barcode.'</strong> was added'));
                             $success[] = array(
                                 'tag' => 'New pack added',
                                 'message' => 'Missing pack <strong>'.$p_barcode.'</strong> was added',

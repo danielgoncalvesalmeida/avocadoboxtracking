@@ -213,6 +213,8 @@ class Employees extends MY_Controller {
     public function delete($id)
     {
         if(!_cr('employees')) return warning_noaccess();
+        
+        // This comment was done in branch dev
         $this->employees_model->delete((int)$id);
         redirect('admin/employees');
     }

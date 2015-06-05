@@ -17,6 +17,7 @@ class Log extends My_Controller {
     
 	public function index()
 	{
+        if(!_cr('log')) return warning_noaccess();
         $this->setTitle('Log | '.$this->config->item('appname'));
         $dview = array();
 

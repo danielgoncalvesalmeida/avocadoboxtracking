@@ -36,9 +36,9 @@
     <?php endif; ?>
     <h2 class="form-signin-heading"><img src="<?php echo sbase_url() ?>assets/img/favicon.ico.png">&nbsp;Avocado</h2>
     <label for="inputEmail" class="sr-only">Email address</label>
-    <input name="edusr" type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+    <input name="edusr" type="text" id="inputEmail" class="form-control" placeholder="username" required autofocus>
     <label for="inputPassword" class="sr-only">Password</label>
-    <input name="edpwd" type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+    <input name="edpwd" type="password" id="inputPassword" class="form-control" placeholder="password" required>
     <div class="checkbox">
       <label>
         <input type="checkbox" value="remember-me"> Remember me

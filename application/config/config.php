@@ -29,7 +29,7 @@ $config['base_url'] = '';
 | variable so that it is blank.
 |
 */
-$config['index_page'] = 'index.php';
+$config['index_page'] = '';
 
 /*
 |--------------------------------------------------------------------------
@@ -432,7 +432,7 @@ $config['csrf_protection'] = TRUE;
 $config['csrf_token_name'] = 'csrf_token_avbotra';
 $config['csrf_cookie_name'] = 'csrf_cookie_avbotra';
 $config['csrf_expire'] = 7200;
-$config['csrf_regenerate'] = TRUE;
+$config['csrf_regenerate'] = FALSE;
 $config['csrf_exclude_uris'] = array();
 
 /*

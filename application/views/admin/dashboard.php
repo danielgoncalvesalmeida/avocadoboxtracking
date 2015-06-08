@@ -251,7 +251,7 @@
                     <?php endif; ?>
                     <br />
                     <div class="row">
-                        <div class="col-xs-12"><a class="btn btn-primary btn-sm" href="<?php echo sbase_url() ?>admin/box/viewhistory/<?php echo $quick_search_userfound['username'] ?>">View history</a></div>
+                        <div class="col-xs-12"><a class="btn btn-primary btn-sm" href="<?php echo sbase_url() ?>admin/customer/viewhistory/<?php echo $quick_search_userfound['username'] ?>">View history</a></div>
                     </div>
                 </div>
                 

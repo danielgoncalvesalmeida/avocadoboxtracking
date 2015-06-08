@@ -9,10 +9,13 @@ class Employees extends MY_Controller {
         parent::__construct();
         $this->isZone('app');
         $this->load->model('employees_model');
+        $this->addJs('admin_employees.js');
     }
     
     public function index()
 	{
+        if(!_cr('employees')) return warning_noaccess();
+        
         // Handle pagination if provided
         $this->p = $this->input->get_post('p',true);
         $this->n = $this->input->get_post('n',true);
@@ -23,91 +26,135 @@ class Employees extends MY_Controller {
         
 		$this->setTitle('Employees | '.$this->config->item('appname'));
         
-        $dview['employees'] = $this->employees_model->getEmployees($this->p, $this->n);
-        $dview['employees_count'] = $this->employees_model->getEmployeesCount();
+        // Handle filter
+        if(isset($_GET['filter']))
+        {
+            $this->load->library('form_validation');
+            $filter_params = array(
+                'firstname' => (isset($_GET['filter']['edfirstname']) ? $_GET['filter']['edfirstname'] : null),
+                'lastname' => (isset($_GET['filter']['edlastname']) ? $_GET['filter']['edlastname'] : null),
+                'username' => (isset($_GET['filter']['edusername']) ? $_GET['filter']['edusername'] : null),
+                'userprofile' => (isset($_GET['filter']['eduserprofile']) && $_GET['filter']['eduserprofile'] > 0 ? $_GET['filter']['eduserprofile'] : null),
+                'status' => (isset($_GET['filter']['edstatus']) && $_GET['filter']['edstatus'] > 0 ? $_GET['filter']['edstatus'] : null),
+                
+            );
+            $this->form_validation->set_data($filter_params);
+            $this->form_validation->set_rules('firstname','firstname','alpha_numeric');
+            $this->form_validation->set_rules('lastname','lastname','alpha_numeric');
+            $this->form_validation->set_rules('userprofile','right profile','numeric');
+            $this->form_validation->set_rules('status','status','numeric');
+
+            if ($this->form_validation->run())
+            {
+                $filter = array();
+                if(!empty($filter_params['firstname']))
+                    $filter[] = array('field' => 'u.firstname', 'value' => $filter_params['firstname'], 'wildcard' => '%{}%');
+                if(!empty($filter_params['lastname']))
+                    $filter[] = array('field' => 'u.lastname', 'value' => $filter_params['lastname'], 'wildcard' => '%{}%');
+                if(!empty($filter_params['username']))
+                    $filter[] = array('field' => 'u.username', 'value' => $filter_params['username'], 'wildcard' => '%{}%');
+                if(!empty($filter_params['userprofile']))
+                    $filter[] = array('field' => 'rp.id_right_profile', 'value' => $filter_params['userprofile'], 'isnumeric' => true);
+                if(!empty($filter_params['status']))
+                {
+                    if($filter_params['status'] == 1)
+                        $filter[] = array('field' => 'u.active', 'value' => true, 'isnumeric' => true);
+                    elseif($filter_params['status'] == 2)
+                        $filter[] = array('field' => 'u.active', 'value' => false, 'isnumeric' => true);
+                }
+                    
+                $dview['employees'] = $this->employees_model->getEmployees($this->p, $this->n, null, $filter);
+                $dview['employees_count'] = $this->employees_model->getEmployeesCount($filter);
+                $dview['items_filtered'] = true;
+                $dview['filter'] = $_GET['filter'];
+                $filter_url_params = '';
+                foreach($_GET['filter'] as $p => $v)
+                    $filter_url_params .= '&filter['.$p.']='.$v;
+                $dview['filter_url_params'] = $filter_url_params;
+            }
+            else
+                $dview['filter_errors'] = true;
+        }
+        
+        // Set the recordset for unfiltred
+        if(!isset($dview['employees']))
+        {
+            $dview['employees'] = $this->employees_model->getEmployees($this->p, $this->n);
+            $dview['employees_count'] = $this->employees_model->getEmployeesCount();
+        }
+        
+        $this->load->model('profiles_model');
+        $dview['userprofiles'] = $this->profiles_model->getProfiles();
         
 		$this->display('employees_list',$dview);
 	}
     
     public function add()
     {
-        $this->setTitle('Ajouter un employée - '.$this->config->item('appname'));
+        if(!_cr('employees')) return warning_noaccess();
+        
+        $this->setTitle('Add an employee - '.$this->config->item('appname'));
         $this->load->helper('form');
         $this->load->library('form_validation');
-        $this->form_validation->set_rules('edlastname','nom','trim|required|xss_clean');
-        $this->form_validation->set_rules('edfirstname','prénom','trim|required|xss_clean');
-        $this->form_validation->set_rules('edsocialid','matricule sociale','trim|callback_checkvalidsocialid||xss_clean');
-        $this->form_validation->set_rules('edbirthdate','date de naissance','required|callback_checkvaliddate|xss_clean');
-        $this->form_validation->set_rules('edusername','nom d\'utilisateur','trim|alpha_numeric|callback_checkvalidusername|xss_clean');
-        $this->form_validation->set_rules('edpassword','mot de pass','required|trim|xss_clean');
-        $this->form_validation->set_rules('edemployeenumber','numéro employée','trim|callback_checkvalidemployeenumber|xss_clean');
-        $this->form_validation->set_rules('edemail','email','trim|valid_email|callback_checkvalidemail|xss_clean');
-        $this->form_validation->set_rules('edprofile','profile','integer|required|callback_checkRightProfileId|xss_clean');
-        $this->form_validation->set_rules('edsite','site','integer|required|callback_checkSiteId|xss_clean');
-                
+        $this->form_validation->set_rules('edlastname','lastname','trim|required');
+        $this->form_validation->set_rules('edfirstname','firstname','trim|required');
+        $this->form_validation->set_rules('edusername','username','trim|required|callback_checkvalidusername');
+        $this->form_validation->set_rules('edpassword','password','required|trim');   
+        $this->form_validation->set_rules('edprofile','profile','integer|required|callback_checkRightProfileId');
+
         if ($this->form_validation->run())
         {
+           
             // Save data
             $data = array(
-                'id_default_site' => $this->input->post('edsite'),
                 'id_domain' => (int)getUserDomain(),
                 'id_right_profile' => (int)$this->input->post('edprofile'),
                 'firstname' => ucwords($this->input->post('edfirstname')), 
                 'lastname' => ucwords($this->input->post('edlastname')), 
-                'socialid' => strtoupper($this->input->post('edsocialid')),
-                'birthdate' => $this->input->post('edbirthdate'), 
                 'username' => strtolower($this->input->post('edusername')),
                 'password' => sha1($this->config->item('salt').$this->input->post('edpassword')),
-                'use_passcode' => (validate_isUnsignedInt($this->input->post('edpassword'))? 1 : 0),
-                'employee_number' => $this->input->post('edemployeenumber'),
-                'email' => strtolower($this->input->post('edemail')),
-                'tag' => genTag(),
+                'use_passcode' => false,
                 'date_add' => date('Y-m-d H:i:s'),
                 'date_upd' => date('Y-m-d H:i:s')
             );
             $this->db->insert('user',$data);
             $dview['id_user'] = $this->db->insert_id();
-            $dview['flash_success'] = 'Nouvel employée ajouté avec succès';
+            $dview['flash_success'] = 'New employee succesfully added';
         }
         
         $this->load->model('profiles_model');
-        $this->load->model('sites_model');
         $dview['profiles'] = $this->profiles_model->getProfiles();
-        $dview['sites'] = $this->sites_model->getSites();
 		$this->display('employees_add',$dview);
     }
     
     public function edit($id_user)
     {
-        $this->setTitle('Editer l\'employée - '.$this->config->item('appname'));
+        if(!_cr('employees')) return warning_noaccess();
+        
+        $this->setTitle('Edit the employee - '.$this->config->item('appname'));
         $this->load->helper('form');
         $this->load->library('form_validation');
         
-        $this->form_validation->set_rules('edlastname','nom','trim|required|xss_clean');
-        $this->form_validation->set_rules('edlastname','nom','trim|required|xss_clean');
-        $this->form_validation->set_rules('edfirstname','prénom','trim|required|xss_clean');
-        $this->form_validation->set_rules('edsocialid','matricule sociale','trim|callback_checkvalidsocialid['.$id_user.']|xss_clean');
-        $this->form_validation->set_rules('edbirthdate','date de naissance','required|callback_checkvaliddate['.$id_user.']|xss_clean');
-        $this->form_validation->set_rules('edusername','nom d\'utilisateur','trim|alpha_numeric|callback_checkvalidusername['.$id_user.']|xss_clean');
-        $this->form_validation->set_rules('edpassword','mot de pass','trim|min_length[3]|integer|xss_clean');
-        $this->form_validation->set_rules('edemployeenumber','numéro employée','trim|callback_checkvalidemployeenumber['.$id_user.']|xss_clean');
-        $this->form_validation->set_rules('edemail','email','trim|valid_email|callback_checkvalidemail['.$id_user.']|xss_clean');
-        $this->form_validation->set_rules('edprofile','profile','integer|required|callback_checkRightProfileId|xss_clean');
-        $this->form_validation->set_rules('edsite','site','integer|required|callback_checkSiteId|xss_clean');
+        $this->form_validation->set_rules('edlastname','lastname','trim|required');
+        $this->form_validation->set_rules('edfirstname','firstname','trim|required');
+        $this->form_validation->set_rules('edusername','username','trim|callback_checkvalidusername['.$id_user.']');
+        $this->form_validation->set_rules('edprofile','profile','integer|required|callback_checkRightProfileId');
+        $this->form_validation->set_rules('edenabled','enabled','integer');
                 
         if ($this->form_validation->run())
         {
+            // Protect user from disable himself
+            if($id_user == getUserId())
+                $enabled = 1;
+            else
+                $enabled = (int)$this->input->post('edenabled');
             // Save data
             $data = array(
-                'id_default_site' => $this->input->post('edsite'),
                 'id_right_profile' => (int)$this->input->post('edprofile'),
                 'firstname' => ucwords($this->input->post('edfirstname')), 
                 'lastname' => ucwords($this->input->post('edlastname')), 
-                'socialid' => strtoupper($this->input->post('edsocialid')),
-                'birthdate' => $this->input->post('edbirthdate'), 
+                'active' => ($enabled == 1 ? true : false),
                 'username' => strtolower($this->input->post('edusername')),
-                'employee_number' => $this->input->post('edemployeenumber'),
-                'email' => strtolower($this->input->post('edemail')),
                 'date_upd' => date('Y-m-d H:i:s')
             );
 
@@ -118,15 +165,13 @@ class Employees extends MY_Controller {
             }
             $this->db->where('id_user',$id_user);
             $this->db->update('user',$data);
-            $dview['flash_success'] = 'Modifications enregistrées avec succès';
+            $dview['flash_success'] = 'Modifications successfully saved!';
             
         }
         
         $dview['employee'] = $this->employees_model->getEmployee($id_user);
         $this->load->model('profiles_model');
-        $this->load->model('sites_model');
         $dview['profiles'] = $this->profiles_model->getProfiles();
-        $dview['sites'] = $this->sites_model->getSites();
 		$this->display('employees_edit',$dview);
     }
     
@@ -167,6 +212,8 @@ class Employees extends MY_Controller {
     
     public function delete($id)
     {
+        if(!_cr('employees')) return warning_noaccess();
+
         $this->employees_model->delete((int)$id);
         redirect('admin/employees');
     }
@@ -300,7 +347,7 @@ class Employees extends MY_Controller {
     {
         if($this->employees_model->usernameExists($str, $exclude))
         {
-            $this->form_validation->set_message('checkvalidusername','Le nom d\'utilisateur est déjà utilisé ! Veuillez choisir un autre.');
+            $this->form_validation->set_message('checkvalidusername','The given username is already assigned. Please try another one!');
             return false;
         }
         else
@@ -346,7 +393,7 @@ class Employees extends MY_Controller {
             return true;
         else
         {
-            $this->form_validation->set_message('checkRightProfileId','Le %s indiqué n\'existe pas ! Veuillez choisir un autre.');
+            $this->form_validation->set_message('checkRightProfileId','Profile %s doesn\'t exist! Please select a valid user profile!');
             return false;
         }
     }

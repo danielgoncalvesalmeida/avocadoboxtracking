@@ -52,40 +52,33 @@
     <div class="collapse navbar-collapse" id="navbar-collapse-1">
         <ul class="nav navbar-nav">
             
-        <?php if (_cr('boxes') || 1==1 ): ?>
+        <!-- Customers menu -->
+          <li>
+              <a href="<?php echo sbase_url() ?>admin/customer">Customers</a>
+          </li>
+            
         <!-- Boxes menu -->
           <li>
-              <a href="<?php echo sbase_url() ?>admin/box">Packs</a>
+              <a href="<?php echo sbase_url() ?>admin/box">Box</a>
           </li>
-        <?php endif; ?>
           
         <!-- Shipping menu -->
           <li>
               <a href="<?php echo sbase_url() ?>admin/shipping">Shippings</a>
           </li>
           
+        <?php if (_cr('log')): ?>  
         <!-- Log menu -->
           <li>
               <a href="<?php echo sbase_url() ?>admin/log">Log</a>
           </li>
-      
-          
-        <?php if (_cr('employees') && 1==0): ?>
-        <!-- Employees menu -->
-          <li class="dropdown"><a class="dropdown-toggle"  data-toggle="dropdown" href="#">Employés <b class="caret"></b></a>
-            <ul class="dropdown-menu" >
-              <li><a href="<?php echo sbase_url() ?>admin/employees">Utilisateurs</a></li>
-            </ul>
-          </li>
         <?php endif; ?>
           
-        <?php if (_cr('admin') && 1==0): ?>
-        <!-- Admin -->
-        <li class="dropdown"><a class="dropdown-toggle"  data-toggle="dropdown" href="#">Admin <b class="caret"></b></a>
-          <ul class="dropdown-menu" >
-              <li><a href="<?php echo sbase_url() ?>admin/profiles">Profiles</a></li>
-          </ul>
-        </li>
+        <?php if (_cr('employees')): ?>
+        <!-- Employees menu -->
+          <li class="dropdown">
+            <a href="<?php echo sbase_url() ?>admin/employees">Employees</a>
+          </li>
         <?php endif; ?>
         
         <!-- Close the left part of the navbar links -->

@@ -186,10 +186,10 @@ class Importreferences extends My_Controller {
                             $this->db->insert('pack',$data);
                             $id_pack = $this->db->insert_id();
                             
-                            $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'New pack added', 'message' => 'Missing pack <strong>'.$p_barcode.'</strong> was added'));
+                            $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'New box added', 'message' => $msg));
                             $success[] = array(
-                                'tag' => 'New pack added',
-                                'message' => 'Missing pack <strong>'.$p_barcode.'</strong> was added',
+                                'tag' => 'New box added',
+                                'message' => 'Missing box <strong>'.$p_barcode.'</strong> was added',
                             );
                         }
                         else
@@ -216,14 +216,14 @@ class Importreferences extends My_Controller {
                             // If pack is in conflict -> do not handle it and notify it
                             if(strcasecmp($row->username, $username) != 0)
                             {
-                                $msg = 'Can\'t add pack '.$p_barcode.' to shipping'.(count($set['SH']) > 1 ? 's ':'')
+                                $msg = 'Can\'t add box '.$p_barcode.' to shipping'.(count($set['SH']) > 1 ? 's ':'')
                                         .': <strong>'.implode(', ', $set['SH']).'</strong> assigned to customer <strong>'.$username.'</strong>.'
                                         .' It is already in outbound for shipping <strong>'.$row->reference.'</strong> for customer <strong>'.$row->username.'</strong>';
                                 $failed[] = array(
-                                    'tag' => 'Pack discarded due to username missmatch',
+                                    'tag' => 'Box discarded due to username missmatch',
                                     'message' => $msg,
                                 );
-                                $this->log_model->log(array('type' => 3, 'operation' => 2, 'message_short' => 'Pack discarded due to username missmatch', 'message' => $msg));
+                                $this->log_model->log(array('type' => 3, 'operation' => 2, 'message_short' => 'Box discarded due to username missmatch', 'message' => $msg));
                                 // Remove this pack from buffer_pack
                                 $packs_to_be_removed[] = $p_id;
                             }
@@ -267,17 +267,17 @@ class Importreferences extends My_Controller {
                                 $this->db->insert('shipping_pack',$data);
                                 $success[] = array(
                                     'tag' => 'Outbound added',
-                                    'message' => 'Pack '.$p_barcode.' added as outbound for shipping '.$sh->reference,
+                                    'message' => 'Box '.$p_barcode.' added as outbound for shipping '.$sh->reference,
                                 );
-                                $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'Outbound added', 'message' => 'Pack '.$p_barcode.' added as outbound for shipping '.$sh->reference));
+                                $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'Outbound added', 'message' => 'Box '.$p_barcode.' added as outbound for shipping '.$sh->reference));
                             }
                             else
                             {
                                 $success[] = array(
                                     'tag' => 'Outbound already exists',
-                                    'message' => 'Pack '.$p_barcode.' is already an outbound for shipping '.$sh->reference,
+                                    'message' => 'Box '.$p_barcode.' is already an outbound for shipping '.$sh->reference,
                                 );
-                                $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'Outbound already exists', 'message' => 'Pack '.$p_barcode.' is already an outbound for shipping '.$sh->reference));
+                                $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'Outbound already exists', 'message' => 'Box '.$p_barcode.' is already an outbound for shipping '.$sh->reference));
                             }
                         }
                     }
@@ -351,10 +351,10 @@ class Importreferences extends My_Controller {
                     if($_pack === null)
                     {
                         $failed[] = array(
-                            'tag' => 'Unidentified pack',
+                            'tag' => 'Unidentified box',
                             'message' => $pack.' is unknown'
                         );
-                        $this->log_model->log(array('type' => 2, 'operation' => 3, 'message_short' => 'Unidentified pack', 'message' => $pack.' is unknown'));
+                        $this->log_model->log(array('type' => 2, 'operation' => 3, 'message_short' => 'Unidentified box', 'message' => $pack.' is unknown'));
                         continue;
                     }
                     else
@@ -391,13 +391,13 @@ class Importreferences extends My_Controller {
                             
                             $success[] = array(
                                 'tag' => 'Successful inbound',
-                                'message' => 'Pack <strong>'.$pack.'</strong> is inbound for '.(count($shippings)>1 ? 'shippings : '.implode(', ', $str_shippings) : 'shipping : '.implode(', ', $str_shippings) ),
+                                'message' => 'Box <strong>'.$pack.'</strong> is inbound for '.(count($shippings)>1 ? 'shippings : '.implode(', ', $str_shippings) : 'shipping : '.implode(', ', $str_shippings) ),
                             );
-                            $this->log_model->log(array('type' => 1, 'operation' => 3, 'message_short' => 'Successful inbound', 'message' => 'Pack <strong>'.$pack.'</strong> is inbound for '.(count($shippings)>1 ? 'shippings : '.implode(', ', $str_shippings) : 'shipping : '.implode(', ', $str_shippings) ) ));
+                            $this->log_model->log(array('type' => 1, 'operation' => 3, 'message_short' => 'Successful inbound', 'message' => 'Box <strong>'.$pack.'</strong> is inbound for '.(count($shippings)>1 ? 'shippings : '.implode(', ', $str_shippings) : 'shipping : '.implode(', ', $str_shippings) ) ));
                         }
                         else
                             $failed[] = array(
-                                'tag' => 'Pack is already inbound',
+                                'tag' => 'Box is already inbound',
                                 'message' => $pack.' is currently inbound',
                             );
                             $this->log_model->log(array('type' => 3, 'operation' => 3, 'message_short' => $pack.' is currently inbound' ));

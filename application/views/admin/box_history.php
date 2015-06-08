@@ -2,7 +2,7 @@
 <div class="row">
     <div class="col-md-12">
         <a href="<?php echo (empty($link_back) ? sbase_url().'admin/box/' : sbase_url().$link_back ) ?>" class="btn btn-default pull-right">Back</a>
-        <h2 class="pull-left">Pack history <?php echo (isset($pack->id_pack) ? ' | '.$pack->barcode : '') ?></h2>
+        <h2 class="pull-left">Box history <?php echo (isset($pack->id_pack) ? ' | '.$pack->barcode : '') ?></h2>
     </div>
 </div>
 
@@ -15,7 +15,7 @@
 <div class="row">
     <div class="col-md-12">
         <div class="alert alert-info">
-            <b>Info</b> : Currently there is no history for the given pack!
+            <b>Info</b> : Currently there is no history for the given box!
         </div>
     </div>
 </div>

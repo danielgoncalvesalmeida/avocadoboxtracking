@@ -1,7 +1,7 @@
 <!-- box_list -->
 <div class="row">
     <div class="col-md-12">
-        <h2 class="pull-left">Packs</h2>
+        <h2 class="pull-left">Boxes</h2>
     </div>
 </div>
 
@@ -14,7 +14,7 @@
 <div class="row">
     <div class="col-md-12">
         <div class="alert alert-info">
-            <b>Info</b> : Currently there are no packs inserted!
+            <b>Info</b> : Currently there are no boxes inserted!
         </div>
     </div>
 </div>

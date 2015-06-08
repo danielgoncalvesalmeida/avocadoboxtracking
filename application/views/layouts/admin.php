@@ -59,7 +59,7 @@
             
         <!-- Boxes menu -->
           <li>
-              <a href="<?php echo sbase_url() ?>admin/box">Packs</a>
+              <a href="<?php echo sbase_url() ?>admin/box">Box</a>
           </li>
           
         <!-- Shipping menu -->

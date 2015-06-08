@@ -52,12 +52,15 @@
     <div class="collapse navbar-collapse" id="navbar-collapse-1">
         <ul class="nav navbar-nav">
             
-        <?php if (_cr('boxes') || 1==1 ): ?>
+        <!-- Customers menu -->
+          <li>
+              <a href="<?php echo sbase_url() ?>admin/customer">Customers</a>
+          </li>
+            
         <!-- Boxes menu -->
           <li>
               <a href="<?php echo sbase_url() ?>admin/box">Packs</a>
           </li>
-        <?php endif; ?>
           
         <!-- Shipping menu -->
           <li>

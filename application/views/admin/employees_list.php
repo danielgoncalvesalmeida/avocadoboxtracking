@@ -117,7 +117,9 @@
                     <td>
                         <div class="btn-group pull-right" role="group">
                             <a href="<?php echo sbase_url() ?>admin/employees/edit/<?php echo $employee->id_user ?>" class="btn btn-primary">Edit</a>
+                            <?php if($employee->id_user != getUserId()): ?>
                             <a href="<?php echo sbase_url() ?>admin/employees/delete/<?php echo $employee->id_user ?>" class="btn btn-danger btdelete_employee">Delete</a>
+                            <?php endif; ?>
                         </div>
                     </td>
                     

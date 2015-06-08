@@ -138,7 +138,7 @@ class Customer_Model extends CI_Model {
     
     public function validate_username($username)
     {
-        return preg_match('/^[a-zA-Z0-9_-]+$/', $username);
+        return preg_match('/^[a-zA-Z0-9_-\s]+$/', $username);
     }
     
     

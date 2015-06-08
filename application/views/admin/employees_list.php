@@ -28,28 +28,28 @@
     <div class="filter-wrapper">
     <div class="col-md-2">
         <div class="form-group">
-            <label for="edfirstname">firstname</label>
+            <label for="edfirstname">Firstname</label>
             <input type="text" class="form-control" id="edfirstname" name="filter[edfirstname]" placeholder="Enter the firstname" value="<?php echo (isset($filter['edfirstname']) ? $filter['edfirstname'] : '') ?>">
         </div>
     </div>
         
     <div class="col-md-2">
         <div class="form-group">
-            <label for="edlastname">lastname</label>
+            <label for="edlastname">Lastname</label>
             <input type="text" class="form-control" id="edlastname" name="filter[edlastname]" placeholder="Enter the lastname" value="<?php echo (isset($filter['edlastname']) ? $filter['edlastname'] : '') ?>">
         </div>
     </div>
         
     <div class="col-md-2">
         <div class="form-group">
-            <label for="edusername">username</label>
+            <label for="edusername">Username</label>
             <input type="text" class="form-control" id="edusername" name="filter[edusername]" placeholder="Enter the username" value="<?php echo (isset($filter['edusername']) ? $filter['edusername'] : '') ?>">
         </div>
     </div>
         
     <div class="col-md-2">
         <div class="form-group">
-            <label for="">userprofile</label>
+            <label for="">User profile</label>
             <select class="form-control" name="filter[eduserprofile]">
                 <option value="0" <?php echo (isset($filter['eduserprofile']) && $filter['eduserprofile']==0 ? 'selected' : '') ?> >All</option>
                 <?php foreach ($userprofiles as $k => $v): ?>

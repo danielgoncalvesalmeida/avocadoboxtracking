@@ -1,6 +1,22 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
 
-
+<?php if(isset($submit_error)): ?>
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-danger">
+            <div class="panel-heading">
+                Error 
+            </div>
+            <div class="panel-body">
+                <?php echo $submit_error ?>
+            </div>
+        
+        </div>
+    </div>
+</div>
+<?php
+    endif;
+?>
 <div class="row">
     <div class="col-md-12">
         

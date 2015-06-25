@@ -64,13 +64,13 @@ class Customer_Model extends CI_Model {
             FROM ".$this->db->dbprefix('shipping')." s "
             
             .(isset($where_str) ? $where_str : '')
-            ."GROUP BY s.`username` "   
+            ."WHERE 1 = 0 GROUP BY s.`username` "   
             .(empty($orderby) ? 'ORDER BY s.`username` ' : 'ORDER BY '.$orderby)
             .((is_numeric($p) && is_numeric($n)) ? ' LIMIT '.$p * $n.','.$n : '');
         
         $result = $this->db->query($sql);
 
-        if ( $result === null )
+        if ( $result->num_rows === null )
             return false;
         
         // Got results 

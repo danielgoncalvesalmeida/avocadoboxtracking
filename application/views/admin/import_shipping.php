@@ -19,10 +19,21 @@
             
             
     <div class="form-group">
-        <label for="inputEmail3" class="col-sm-2 control-label">Upload a file</label>
+        <label class="col-sm-2 control-label">Upload a file</label>
         <div class="col-sm-6">
             <input type="file" name="edfile" >
             <p class="help-block">Select the file with the shipping information</p>
+        </div>
+    </div> 
+            
+    <div class="form-group">
+        <label class="col-sm-2 control-label"></label>
+        <div class="col-sm-6">
+            <div class="checkbox">
+                <label>
+                  <input type="checkbox" value="1" name="update_delivery_date"> Update delivery date for existing shipping
+                </label>
+            </div>
         </div>
     </div> 
             

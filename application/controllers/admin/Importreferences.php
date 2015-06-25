@@ -61,6 +61,7 @@ class Importreferences extends My_Controller {
         {
             $failed = array();
             $success = array();
+            $warning = array();
             
             if(isset($_FILES['edfile']['name']) && !empty($_FILES['edfile']['name']))
             {
@@ -88,8 +89,24 @@ class Importreferences extends My_Controller {
                 else
                     $result = $this->parseOutboundReferences($refs);
             }
+            // No reference were provided
+            else
+            {
+                $dview['submit_error'] = 'No references were submited';
+                $this->display('import_references_outbound', $dview);
+                return;
+            }
             
+            $dview['parse_result'] = $result;
             
+            // Begin with adding the failed boxes to $failed
+            foreach ($result['failed'] as $f)
+            {
+                $failed[] = array(
+                    'tag' => 'Incorrect box reference',
+                    'message' => 'Box reference <strong>'.$f.'</strong> is incorrect',
+                );
+            }
             
             // Add the parsed boxes to the log
             if(isset($result['sets']) && count($result['sets']) > 0)
@@ -186,8 +203,8 @@ class Importreferences extends My_Controller {
                             $this->db->insert('pack',$data);
                             $id_pack = $this->db->insert_id();
                             
-                            $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'New box added', 'message' => $msg));
-                            $success[] = array(
+                            $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'New box added', 'message' => 'Missing box <strong>'.$p_barcode.'</strong> was added'));
+                            $warning[] = array(
                                 'tag' => 'New box added',
                                 'message' => 'Missing box <strong>'.$p_barcode.'</strong> was added',
                             );
@@ -273,7 +290,7 @@ class Importreferences extends My_Controller {
                             }
                             else
                             {
-                                $success[] = array(
+                                $warning[] = array(
                                     'tag' => 'Outbound already exists',
                                     'message' => 'Box '.$p_barcode.' is already an outbound for shipping '.$sh->reference,
                                 );
@@ -297,6 +314,7 @@ class Importreferences extends My_Controller {
       
             $dview['success'] = $success;
             $dview['failed'] = $failed;
+            $dview['warning'] = $warning;
         }
         
         $this->display('import_references_outbound', $dview);
@@ -327,6 +345,12 @@ class Importreferences extends My_Controller {
                 $edrefs = $_POST['edreferences'];
                 $refs = explode("\n", str_replace("\r", "", $edrefs));
                 $packs = $this->parseInboundReferences($refs);
+            }
+            else
+            {
+                $dview['submit_error'] = 'No references were submited';
+                $this->display('import_references_inbound', $dview);
+                return;
             }
             
             if(isset($packs) && count($packs) == 0)
@@ -718,7 +742,7 @@ class Importreferences extends My_Controller {
                         $this->log_model->log(array('type' => 1, 'operation' => 1, 'message' => 'Update of shipping : '.trim($value[0]).' with former username "'.$shipping->username.'" updated to "'.trim($value[1]).'"'));
                     }
                     // Update of date delivery if necessary
-                    if($shipping->date_delivery != trim($value[2]))
+                    if($shipping->date_delivery != trim($value[2]) && isset($_POST['update_delivery_date']))
                     {          
                         $needsupdate = true;
                         $success[] = array(

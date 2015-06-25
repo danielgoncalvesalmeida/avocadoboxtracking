@@ -1,6 +1,22 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
 
-
+<?php if(isset($submit_error)): ?>
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-danger">
+            <div class="panel-heading">
+                Error 
+            </div>
+            <div class="panel-body">
+                <?php echo $submit_error ?>
+            </div>
+        
+        </div>
+    </div>
+</div>
+<?php
+    endif;
+?>
 <div class="row">
     <div class="col-md-12">
         
@@ -67,6 +83,27 @@
     </div>
 </div>
 
+<?php if(isset($parse_result['boxes']) || isset($parse_result['shippings'])): ?>
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                Summary 
+            </div>
+            <div class="panel-body">
+                Processed : 
+                    <?php if(isset($parse_result['boxes'])): echo count($parse_result['boxes']); else: echo '0'; endif; echo ' Boxes '; ?>
+                    |
+                    <?php if(isset($parse_result['shippings'])): echo count($parse_result['shippings']); else: echo '0';  endif; echo ' Shippings '; ?>
+            </div>
+        
+        </div>
+    </div>
+</div>
+<?php
+    endif;
+?>
+
 <?php
     if(isset($failed) && count($failed) > 0):
 ?>
@@ -78,6 +115,40 @@
             </div>
             <div class="panel-body">
             <?php foreach ($failed as $item ): ?>
+                <?php if(isset($item['tag'])): ?>
+                <div class="row">
+                    <div class="col-md-12">
+                        <strong><?php echo $item['tag'] ?></strong> 
+                    </div>
+                </div>
+                <?php endif; ?>
+                <div class="row">
+                    <div class="col-md-12">
+                        <?php echo $item['message'] ?> 
+                        <br /><br />
+                    </div>
+                </div>
+            <?php endforeach; ?>
+            </div>
+        
+        </div>
+    </div>
+</div>
+<?php 
+    endif;
+?>
+
+<?php
+    if(isset($warning) && count($warning) > 0):
+?>
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-warning">
+            <div class="panel-heading">
+                Warning
+            </div>
+            <div class="panel-body">
+            <?php foreach ($warning as $item ): ?>
                 <?php if(isset($item['tag'])): ?>
                 <div class="row">
                     <div class="col-md-12">

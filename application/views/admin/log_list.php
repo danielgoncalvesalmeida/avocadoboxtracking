@@ -167,6 +167,20 @@
         $pages = ceil($items_count / $this->config->item('results_per_page_default'));
         $uri = uri_string();
         
+        // Show only a range of 10 pages
+        $p_window = 4;
+        $p_begin = 1;
+        $p_end = $p + $p_window;
+        if($p > $p_window)
+            $p_begin = $p - $p_window;
+        if($p >= ($pages - $p_window))
+            $p_end = $pages;
+        if($p == 1 && $pages > 2 * $p_window)
+            $p_end = 2*$p_window + 1;
+        if($p == $pages && $pages > 2 * $p_window)
+            $p_begin = $pages - 2*$p_window;
+        
+
         $f_url_params = (isset($filter_url_params) ? $filter_url_params : '');
 ?>           
         </div>
@@ -181,11 +195,39 @@
                 endif;
             ?>
             <?php
-              for ($i = 1; $i <= $pages ; $i++):
+                if($p > $p_window + 1):
+            ?>
+                <li><a href="<?php echo sbase_url().$uri ?>/?p=1&n=<?php echo $this->config->item('results_per_page_default').$f_url_params ?>">1</a></li>
+            <?php
+                endif;
+            ?>
+            <?php
+                if($p > $p_window && $p_begin - 1 > 1):
+            ?>  
+                <li><a href="">..</a></li>
+            <?php
+                endif;
+            ?>   
+            <?php
+              for ($i = $p_begin; $i <= $p_end ; $i++):
             ?>
               <li class="<?php echo (!empty($p) && $p == $i ? 'active' : '') ?>"><a  href="<?php echo sbase_url().$uri ?>/?p=<?php echo $i ?>&n=<?php echo $this->config->item('results_per_page_default').$f_url_params ?>"><?php echo $i ?></a></li>
             <?php
               endfor;
+            ?>
+            <?php
+                if($p < $p_end && $p_end < $pages - 1):
+            ?>  
+                <li><a href="">..</a></li>
+            <?php
+                endif;
+            ?>   
+            <?php
+                if($p < $p_end && $p_end < $pages):
+            ?>
+                <li><a href="<?php echo sbase_url().$uri ?>/?p=<?php echo $pages  ?>&n=<?php echo $this->config->item('results_per_page_default').$f_url_params ?>"><?php echo $pages ?></a></li>
+            <?php
+                endif;
             ?>
             <?php
                 if($p < $pages):

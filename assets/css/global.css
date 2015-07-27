@@ -72,6 +72,13 @@ div.dashboard-success.panel.panel-success div.panel-heading { background: #5cb85
     margin-top: 5px;
 }
 
+/*
+    Normal column widths for the log view
+*/
+table th.log-date-width { width: auto; }
+table th.log-user-width { width: auto; }
+table th.log-type-width { width: auto; }
+
 /* Small devices (tablets, 768px and up) */
 @media (min-width: 768px) {
     .huge { font-size: 5em; }
@@ -80,6 +87,13 @@ div.dashboard-success.panel.panel-success div.panel-heading { background: #5cb85
 /* Medium devices (desktops, 992px and up) */
 @media (min-width: 992px) {
     .huge { font-size: 5em; }
+    
+    /*
+        Force column widths for the log view
+    */
+    table th.log-date-width { width: 164px !important; }
+    table th.log-user-width { width: 164px !important; }
+    table th.log-type-width { width: 80px !important; }
 }
 
 

@@ -117,9 +117,9 @@
     <div class="table-responsive">
     <table class="table table-striped">
         <thead>
-            <th>Date</th>
-            <th>User</th>
-            <th>Type</th>
+            <th class="log-date-width">Date</th>
+            <th class="log-user-width">User</th>
+            <th class="log-type-width">Type</th>
             <th>Operation</th>
             <th>Message</th>
         </thead>

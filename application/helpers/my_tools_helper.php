@@ -377,6 +377,73 @@ function my_prepSearch($str)
     return str_replace(array("-", " ", "_", "/", "\\"), '', $str);
 }
 
+/*
+ * Set params for general use
+ */
+function my_set_param($pname, $pvalue, $id_user = null)
+{
+    if(empty($pname))
+       return false; 
+    
+    $CI =& get_instance();
+    
+    $sql = "SELECT * FROM ".$CI->db->dbprefix('parameter')."
+        WHERE `name` LIKE ?"
+        .(!empty($id_user) ? ' AND `id_user` = ? ':'');
+    $p[] = $pname;
+    if(!empty($id_user))
+        $p[] = $id_user;
+    
+    $result = $CI->db->query($sql, $p)->row();
+    
+    $data['name'] = $pname;
+    $data['value'] = $pvalue;
+    $data['date_upd'] = date('Y-m-d H:i:s');
+    
+    // Add user if provided
+    if(!empty($id_user))
+        $data['id_user'] = (int)$id_user;
+    
+    // Perform an insert or update
+    if($result === null)
+    {
+        $data['date_add'] = date('Y-m-d H:i:s');
+        $CI->db->insert('parameter',$data);
+    }
+    else
+    {
+        $CI->db->where('id_parameter',(int)$result->id_parameter);
+        $CI->db->update('parameter', $data);
+    }
+    // Set performed well
+    return true;
+}
+
+/*
+ * Get params for general use
+ */
+function my_get_param($pname, $id_user = null)
+{
+    if(empty($pname))
+       return  null; 
+    
+    $CI =& get_instance();
+    
+    $sql = "SELECT * FROM ".$CI->db->dbprefix('parameter')."
+        WHERE `name` LIKE ?"
+        .(!empty($id_user) ? ' AND `id_user` = ? ':'');
+    
+    $p[] = $pname;
+    if(!empty($id_user))
+        $p[] = $id_user;
+    
+    $result = $CI->db->query($sql, $p)->row();
+    
+    if($result !== null && isset($result->value))
+        return $result->value;
+    return null;
+}
+
 /**
 * Convert \n and \r\n and \r to <br />
 *

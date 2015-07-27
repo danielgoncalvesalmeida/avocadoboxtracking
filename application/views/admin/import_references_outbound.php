@@ -83,7 +83,7 @@
     </div>
 </div>
 
-<?php if(isset($parse_result['boxes']) || isset($parse_result['shippings'])): ?>
+<?php if(isset($parse_result['boxes_unique']) || isset($parse_result['shippings_unique'])): ?>
 <div class="row">
     <div class="col-md-12">
         <div class="panel panel-info">
@@ -92,9 +92,9 @@
             </div>
             <div class="panel-body">
                 Processed : 
-                    <?php if(isset($parse_result['boxes'])): echo count($parse_result['boxes']); else: echo '0'; endif; echo ' Boxes '; ?>
+                    <?php if(isset($parse_result['boxes'])): echo count($parse_result['boxes_unique']); else: echo '0'; endif; echo ' Boxes '; ?>
                     |
-                    <?php if(isset($parse_result['shippings'])): echo count($parse_result['shippings']); else: echo '0';  endif; echo ' Shippings '; ?>
+                    <?php if(isset($parse_result['shippings'])): echo count($parse_result['shippings_unique']); else: echo '0';  endif; echo ' Shippings '; ?>
             </div>
         
         </div>

@@ -9,6 +9,11 @@ class Importreferences extends My_Controller {
         $this->isZone('app');
         $this->addJs('tabs.js');
         $this->load->model('log_model');
+        
+        $this->addCss('bootstrap-datetimepicker.css');
+        $this->addJs('moment-with-locales.js');
+        $this->addJs('bootstrap-datetimepicker.js');
+        $this->addJs('admin_importreferences.js');
     }
     
 	public function index()
@@ -277,16 +282,17 @@ class Importreferences extends My_Controller {
                                     'id_shipping' => (int)$sh->id_shipping,
                                     'outbound' => true,
                                     'id_user_outbound' => getUserId(),
-                                    'date_outbound' => date('Y-m-d'),
+                                    // Use the date of the shipping as requested by customer in mail of 10 July 2015
+                                    'date_outbound' => $sh->date_delivery,
                                     'date_add' => date('Y-m-d H:i:s'),
                                     'date_upd' => date('Y-m-d H:i:s'),
                                 );
                                 $this->db->insert('shipping_pack',$data);
                                 $success[] = array(
                                     'tag' => 'Outbound added',
-                                    'message' => 'Box '.$p_barcode.' added as outbound for shipping '.$sh->reference,
+                                    'message' => 'Box '.$p_barcode.' added as outbound for shipping ',
                                 );
-                                $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'Outbound added', 'message' => 'Box '.$p_barcode.' added as outbound for shipping '.$sh->reference));
+                                $this->log_model->log(array('type' => 1, 'operation' => 2, 'message_short' => 'Outbound added', 'message' => 'Box '.$p_barcode.' added as outbound for shipping '));
                             }
                             else
                             {
@@ -328,8 +334,21 @@ class Importreferences extends My_Controller {
         
         $isSubmit = (isset($_POST['submitImport']) ? true : false);
         
+        // Retrieve the prefered date for inbound as specified for the current user
+        $cook_date = my_get_param('inbound_default_date', getUserId());
+        if($cook_date === null)
+            $cook_date = date('d/m/Y');
+        $dview['eddate'] = $cook_date;
+        
         if($isSubmit)
-        {
+        {    
+            if(isset($_POST['eddate']))
+            {
+                my_set_param('inbound_default_date', $_POST['eddate'], getUserId() );
+                $cook_date = $_POST['eddate'];
+            }
+            $dview['eddate'] = $cook_date;
+            
             $failed = array();
             $success = array();
             
@@ -395,6 +414,11 @@ class Importreferences extends My_Controller {
                             AND sp.`id_pack` = ?";
                         $shippings = $this->db->query($sql, array($id_pack))->result();
 
+                        // Check and set the inbound date
+                        $date_inbound = convert_dateToDbDate($cook_date);
+                        if($date_inbound === null)
+                            $date_inbound = date('Y-m-d H:i:s');
+                        
                         // This pack has an open cycle
                         if($shippings)
                         {
@@ -404,7 +428,7 @@ class Importreferences extends My_Controller {
                                 $data = array(
                                     'inbound' => true,
                                     'id_user_inbound' => getUserId(),
-                                    'date_inbound' => date('Y-m-d H:i:s'),
+                                    'date_inbound' => $date_inbound,
                                     'date_upd' => date('Y-m-d H:i:s'),
                                 );
                                 $this->db->where('id_shipping_pack',(int)$res->id_shipping_pack);
@@ -415,7 +439,7 @@ class Importreferences extends My_Controller {
                             
                             $success[] = array(
                                 'tag' => 'Successful inbound',
-                                'message' => 'Box <strong>'.$pack.'</strong> is inbound for '.(count($shippings)>1 ? 'shippings : '.implode(', ', $str_shippings) : 'shipping : '.implode(', ', $str_shippings) ),
+                                'message' => 'Box <strong>'.$pack.'</strong> is inbound on '.date_format(new DateTime($date_inbound), 'd/m/Y').' for '.(count($shippings)>1 ? 'shippings : '.implode(', ', $str_shippings) : 'shipping : '.implode(', ', $str_shippings) ),
                             );
                             $this->log_model->log(array('type' => 1, 'operation' => 3, 'message_short' => 'Successful inbound', 'message' => 'Box <strong>'.$pack.'</strong> is inbound for '.(count($shippings)>1 ? 'shippings : '.implode(', ', $str_shippings) : 'shipping : '.implode(', ', $str_shippings) ) ));
                         }
@@ -443,8 +467,10 @@ class Importreferences extends My_Controller {
     private function parseOutboundReferences($refs = array())
     {
         $sets = array(); // Correct sets of shipping (M):(N) boxes
-        $boxes = array(); // Boxes identified during the parse
+        $boxes = array(); // Boxes identified during the parse (Includes duplicates)
+        $boxes_unique = array(); // Count the unique boxes (Excludes duplicates)
         $shippings = array(); // Shippings detected
+        $shippings_unique = array(); // Count unique shippings
         $orphans = array(); // An orphan is a P without a preceding SH
         $failed = array(); // P* that are out of range
         
@@ -464,11 +490,14 @@ class Importreferences extends My_Controller {
             
             if(isset($matchout[0][0]) )
             {
+                $shippings[] = $matchout[0][0];
+                if(!in_array($matchout[0][0], $shippings_unique))
+                    $shippings_unique[] = $matchout[0][0];
+                
                 if(!isset($set['P']))
                 {
                     // Cycle has started now or is still ongoing
                     $set['SH'][] = $matchout[0][0];
-                    $shippings[] = $matchout[0][0];
                 }
                 elseif(isset($set['SH']) && (isset($set['P']) || isset($set['P-ERROR'])) )
                 {
@@ -498,6 +527,8 @@ class Importreferences extends My_Controller {
                         {
                             $set['P'][] = $code;
                             $boxes[] = $code;
+                            if(!in_array($code, $boxes_unique))
+                                $boxes_unique[] = $code;
                         }
                         else
                             // Box is orphan i.e. an SH must come first
@@ -528,6 +559,8 @@ class Importreferences extends My_Controller {
                         {
                             $set['P'][] = $code;
                             $boxes[] = $code;
+                            if(!in_array($code, $boxes_unique))
+                                $boxes_unique[] = $code;
                         }
                         else
                             // Box is orphan i.e. an SH must come first
@@ -558,6 +591,8 @@ class Importreferences extends My_Controller {
                         {
                             $set['P'][] = $code;
                             $boxes[] = $code;
+                            if(!in_array($code, $boxes_unique))
+                                $boxes_unique[] = $code;
                         }
                         else
                             // Box is orphan i.e. an SH must come first
@@ -583,7 +618,9 @@ class Importreferences extends My_Controller {
         $result = array(
             'sets' => $sets,
             'boxes' => $boxes,
+            'boxes_unique' => $boxes_unique,
             'shippings' => $shippings,
+            'shippings_unique' => $shippings_unique,
             'failed' => $failed,
             'orphans' => $orphans,
         );

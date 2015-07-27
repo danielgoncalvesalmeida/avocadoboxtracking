@@ -62,13 +62,28 @@
     -->
             
     <div id="div-tab-upload" class="tab-container">
+    
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">Upload a file</label>
+            <div class="col-sm-6">
+                <input type="file" name="edfile" >
+                <p class="help-block">Select the file with the scanned sequenced references</p>
+            </div>
+        </div> 
+        
+
+        
+        
+    </div>
+    
     <div class="form-group">
-        <label for="inputEmail3" class="col-sm-2 control-label">Upload a file</label>
-        <div class="col-sm-6">
-            <input type="file" name="edfile" >
-            <p class="help-block">Select the file with the scanned sequenced references</p>
+        <label for="" class="col-sm-2 control-label">Date for inbound</label>
+        <div class="col-sm-3">
+            <div class="input-group" id="datetimepicker1">
+                <input type="text" class="form-control" id="eddate" name="eddate" placeholder="Date for inbound" value="<?php echo (isset($eddate) ? $eddate : '') ?>">
+                <div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div>
+            </div>
         </div>
-    </div> 
     </div>
             
     <div class="form-group">
